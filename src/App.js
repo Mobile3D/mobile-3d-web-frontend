@@ -1,5 +1,9 @@
 import React from 'react';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+
+import Login from './pages/login.page';
+import Loading from './pages/loading.page';
 
 //create consistent theme styling for app
 const theme = createMuiTheme({
@@ -20,7 +24,16 @@ const theme = createMuiTheme({
 function App() {
   return (
     <MuiThemeProvider theme={theme}>
-      <div></div>
+      <Router>
+        <div>
+          <Route exact path="/" render={ props => (
+            <Loading />
+          )} />
+          <Route exact path="/login" render={ props => (
+            <Login />
+          )} />
+        </div>
+      </Router>
     </MuiThemeProvider>
   );
 }
