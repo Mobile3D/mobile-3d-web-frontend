@@ -1,5 +1,5 @@
-import React from 'react';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
 import Login from './pages/login.page';
@@ -20,15 +20,28 @@ const theme = createMuiTheme({
   },
 });
 
+function RedirectToLogin() {
+  return (
+    <Redirect exact to="/login" />
+  );
+}
 
 function App() {
+
+  const [authorized, setAuthorized] = useState(false);
+
   return (
     <MuiThemeProvider theme={theme}>
       <Router>
         <div>
-          <Route exact path="/" render={ props => (
-            <Loading />
-          )} />
+
+          { authorized ? (
+            <Route exact path="/" render={ props => (
+              <Loading />
+            )} />
+          ) : (<RedirectToLogin />)
+          }
+
           <Route exact path="/login" render={ props => (
             <Login />
           )} />
