@@ -4,7 +4,7 @@ import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
 import Login from './pages/login.page';
 import Loading from './pages/loading.page';
-import Dashboard from './components/dashboard.component';
+import Home from './pages/home.page';
 
 //create consistent theme styling for app
 const theme = createMuiTheme({
@@ -36,12 +36,10 @@ function App() {
       <Router>
         <div>
 
-          { authorized ? (
-            <Dashboard navTitle="Home">
+          { authorized ? (            
             <Route exact path="/" render={ props => (
-              <Loading />
+              <Home />
             )} />
-            </Dashboard>
           ) : (<RedirectToLogin />)
           }
 
