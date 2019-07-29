@@ -6,6 +6,7 @@ import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
 import HomeIcon from '@material-ui/icons/Home';
 import PrintIcon from '@material-ui/icons/Print';
+import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import FolderIcon from '@material-ui/icons/Folder';
 import ControlCameraIcon from '@material-ui/icons/ControlCamera';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
@@ -32,6 +33,8 @@ function SelectIcon(props) {
     return (<PrintIcon color="primary" style={{ fontSize: 80 }} />);
   } else if (props.action === 'home') {
     return (<HomeIcon color="primary" style={{ fontSize: 80 }} />);
+  } else if (props.action === 'upload') {
+    return (<CloudUploadIcon color="primary" style={{ fontSize: 80 }} />);
   } else if (props.action === 'files') {
     return (<FolderIcon color="primary" style={{ fontSize: 80 }} />);
   } else if (props.action === 'control') {

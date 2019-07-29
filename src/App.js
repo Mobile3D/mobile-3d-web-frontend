@@ -5,6 +5,10 @@ import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import Login from './pages/login.page';
 import Loading from './pages/loading.page';
 import Home from './pages/home.page';
+import Settings from './pages/settings.page';
+import AccountSettings from './pages/accountsettings.page';
+import AddAccount from './pages/addaccount.page';
+import Files from './pages/files.page';
 
 //create consistent theme styling for app
 const theme = createMuiTheme({
@@ -39,6 +43,34 @@ function App() {
           { authorized ? (            
             <Route exact path="/" render={ props => (
               <Home />
+            )} />
+          ) : (<RedirectToLogin />)
+          }
+
+          { authorized ? (            
+            <Route exact path="/files" render={ props => (
+              <Files />
+            )} />
+          ) : (<RedirectToLogin />)
+          }
+
+          { authorized ? (            
+            <Route exact path="/settings" render={ props => (
+              <Settings />
+            )} />
+          ) : (<RedirectToLogin />)
+          }
+
+          { authorized ? (            
+            <Route exact path="/settings/accounts" render={ props => (
+              <AccountSettings />
+            )} />
+          ) : (<RedirectToLogin />)
+          }
+
+          { authorized ? (            
+            <Route exact path="/settings/accounts/add" render={ props => (
+              <AddAccount />
             )} />
           ) : (<RedirectToLogin />)
           }

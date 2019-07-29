@@ -5,7 +5,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
 
 import Dashboard from '../components/dashboard.component';
-import ActionCard from '../components/actioncard.component';
+import SettingsCard from '../components/settingscard.component';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -35,35 +35,32 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default function Home() {
+export default function Settings() {
   const classes = useStyles();
 
   return (
-    <Dashboard navTitle="Home">
+    <Dashboard navTitle="Settings">
       <div className={classes.heroContent}>
         <Typography component="h1" variant="h3" align="center" color="textPrimary" gutterBottom>
-          Welcome Back, {/* this.context.user.firstname */ 'Test User'}.
-        </Typography>
-        <Typography variant="h5" align="center" color="textSecondary" paragraph>
-          Your 3D-Printer is Ready For You.
+          Settings
         </Typography>
       </div>
       <Grid container className={classes.root} spacing={4}>
         <Grid item xs={12}>
           <Grid container className={classes.options} justify="center" spacing={4}>
             <Grid item>
-              <Link to="/controls" className={classes.link} >
-                <ActionCard action="control" title="Controls" description="Print files, control the printer, move the axis" />
+              <Link to="/settings/connection" className={classes.link} >
+                <SettingsCard action="connection" title="Connection" />
               </Link>
             </Grid>
             <Grid item>
-              <Link to="/upload" className={classes.link} >
-                <ActionCard action="upload" title="Upload" description="Add files to the printing list" />
+              <Link to="/settings/accounts" className={classes.link} >
+                <SettingsCard action="accounts" title="Accounts" />
               </Link>
             </Grid>
             <Grid item>
-              <Link to="/files" className={classes.link} >
-                <ActionCard action="files" title="Files" description="View uploaded files, load files, print them again" />
+              <Link to="/settings/info" className={classes.link} >
+                <SettingsCard action="info" title="Info" />
               </Link>
             </Grid>
           </Grid>

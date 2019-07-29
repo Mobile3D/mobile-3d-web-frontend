@@ -11,7 +11,7 @@ import Avatar from '@material-ui/core/Avatar';
 import deepOrange from '@material-ui/core/colors/deepOrange';
 import pink from '@material-ui/core/colors/pink';
 import HomeIcon from '@material-ui/icons/Home';
-import PrintIcon from '@material-ui/icons/Print';
+import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import FolderIcon from '@material-ui/icons/Folder';
 import ControlCameraIcon from '@material-ui/icons/ControlCamera';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
@@ -62,7 +62,7 @@ export default function SideDrawer(props) {
           <List>
             <ListItem button>
               <ListItemAvatar>
-  <Avatar className={classes.pinkAvatar}>{/* this.context.user.firstname.substring(0, 1) */ 'T'}</Avatar>
+                <Avatar className={classes.pinkAvatar}>{/* this.context.user.firstname.substring(0, 1) */ 'T'}</Avatar>
               </ListItemAvatar>
               <ListItemText
                 primary={/* this.context.user.firstname + ' ' + this.context.user.lastname */ 'Test User'}
@@ -72,25 +72,25 @@ export default function SideDrawer(props) {
           <Divider />
           <List>
             <Link to="/" className={classes.link} >
-              <ListItem button selected={ props.selectedPage === 'start' }>
+              <ListItem button selected={ props.selectedPage === 'home' }>
                 <ListItemIcon><HomeIcon /></ListItemIcon>
                 <ListItemText primary="Home" />
               </ListItem>
             </Link>
-            <Link to="/print" className={classes.link} >
-              <ListItem button selected={ props.selectedPage === 'dishes' }>
-                <ListItemIcon><PrintIcon /></ListItemIcon>
-                <ListItemText primary="Print" />
-              </ListItem>
-            </Link>
             <Link to="/controls" className={classes.link} >
-              <ListItem button selected={ props.selectedPage === 'cookbooks' }>
+              <ListItem button selected={ props.selectedPage === 'controls' }>
                 <ListItemIcon><ControlCameraIcon /></ListItemIcon>
                 <ListItemText primary="Controls" />
               </ListItem>
             </Link>
+            <Link to="/upload" className={classes.link} >
+              <ListItem button selected={ props.selectedPage === 'upload' }>
+                <ListItemIcon><CloudUploadIcon /></ListItemIcon>
+                <ListItemText primary="Upload" />
+              </ListItem>
+            </Link>
             <Link to="/files" className={classes.link} >
-              <ListItem button selected={ props.selectedPage === 'categories' }>
+              <ListItem button selected={ props.selectedPage === 'files' }>
                 <ListItemIcon><FolderIcon /></ListItemIcon>
                 <ListItemText primary="Files" />
               </ListItem>
@@ -99,7 +99,7 @@ export default function SideDrawer(props) {
           <Divider />
           <List>
             <Link to="/settings" className={classes.link} >
-              <ListItem button>
+              <ListItem button selected={ props.selectedPage === 'files' }>
                 <ListItemIcon><SettingsIcon /></ListItemIcon>
                 <ListItemText primary="Settings" />
               </ListItem>
