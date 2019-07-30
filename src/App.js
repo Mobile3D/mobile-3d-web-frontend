@@ -7,8 +7,10 @@ import Loading from './pages/loading.page';
 import Home from './pages/home.page';
 import Settings from './pages/settings.page';
 import AccountSettings from './pages/accountsettings.page';
+import ConnectionSettings from './pages/connectionsettings.page';
 import AddAccount from './pages/addaccount.page';
 import Files from './pages/files.page';
+import Upload from './pages/upload.page';
 
 //create consistent theme styling for app
 const theme = createMuiTheme({
@@ -48,6 +50,13 @@ function App() {
           }
 
           { authorized ? (            
+            <Route exact path="/upload" render={ props => (
+              <Upload />
+            )} />
+          ) : (<RedirectToLogin />)
+          }
+
+          { authorized ? (            
             <Route exact path="/files" render={ props => (
               <Files />
             )} />
@@ -57,6 +66,13 @@ function App() {
           { authorized ? (            
             <Route exact path="/settings" render={ props => (
               <Settings />
+            )} />
+          ) : (<RedirectToLogin />)
+          }
+
+          { authorized ? (            
+            <Route exact path="/settings/connection" render={ props => (
+              <ConnectionSettings />
             )} />
           ) : (<RedirectToLogin />)
           }

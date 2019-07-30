@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 
 import Dashboard from '../components/dashboard.component';
 import ActionCard from '../components/actioncard.component';
+import Status from '../components/status.component';
 
 const useStyles = makeStyles(theme => ({
   root: {

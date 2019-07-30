@@ -135,8 +135,9 @@ export default function Files(props) {
           </Table>
         </Paper>
         <Link to="/upload" className={classes.link} >
-          <Fab size="large" color="primary" aria-label="Add" className={classes.fab}>
+          <Fab variant="extended" size="large" color="primary" aria-label="Add" className={classes.fab}>
             <AddIcon />
+            Upload File
           </Fab>
         </Link>
       </div>

@@ -148,8 +148,9 @@ export default function AccountSettings(props) {
           <Button className={classes.button} onClick={() => {window.history.back()}} >Back</Button>
         </div>
         <Link to="/settings/accounts/add" className={classes.link} >
-          <Fab size="large" color="primary" aria-label="Add" className={classes.fab}>
+          <Fab variant="extended" size="large" color="primary" aria-label="Add" className={classes.fab}>
             <AddIcon />
+            Add User
           </Fab>
         </Link>
       </div>
