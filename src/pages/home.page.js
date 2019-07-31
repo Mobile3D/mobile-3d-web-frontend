@@ -53,6 +53,15 @@ export default function Home() {
         <Grid item xs={12}>
           <Grid container className={classes.options} justify="center" spacing={4}>
             <Grid item>
+              <Status />
+            </Grid>
+          </Grid>
+        </Grid>
+      </Grid>
+      <Grid container className={classes.root} spacing={4}>
+        <Grid item xs={12}>
+          <Grid container className={classes.options} justify="center" spacing={4}>
+            <Grid item>
               <Link to="/controls" className={classes.link} >
                 <ActionCard action="control" title="Controls" description="Print files, control the printer, move the axis" />
               </Link>

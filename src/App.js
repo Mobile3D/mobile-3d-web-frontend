@@ -11,6 +11,7 @@ import ConnectionSettings from './pages/connectionsettings.page';
 import AddAccount from './pages/addaccount.page';
 import Files from './pages/files.page';
 import Upload from './pages/upload.page';
+import Controls from './pages/controls.page';
 
 //create consistent theme styling for app
 const theme = createMuiTheme({
@@ -45,6 +46,13 @@ function App() {
           { authorized ? (            
             <Route exact path="/" render={ props => (
               <Home />
+            )} />
+          ) : (<RedirectToLogin />)
+          }
+
+          { authorized ? (            
+            <Route exact path="/controls" render={ props => (
+              <Controls />
             )} />
           ) : (<RedirectToLogin />)
           }
