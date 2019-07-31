@@ -22,7 +22,7 @@ const useStyles = makeStyles(theme => ({
     marginTop: theme.spacing(8),
     maxWidth: 600,
     margin: '0 auto',
-    padding: `${theme.spacing(8)}px 0 ${theme.spacing(6)}px`,
+    padding: `${theme.spacing(8)}px 0 ${theme.spacing(1)}px`,
   },
   link: {
     textDecoration: 'none',
