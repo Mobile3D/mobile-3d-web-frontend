@@ -36,14 +36,14 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default function Home() {
+export default function Home(props) {
   const classes = useStyles();
 
   return (
     <Dashboard navTitle="Home">
       <div className={classes.heroContent}>
         <Typography component="h1" variant="h3" align="center" color="textPrimary" gutterBottom>
-          Welcome Back, {/* this.context.user.firstname */ 'Test User'}.
+          Welcome Back, {props.user.firstname + ' ' + props.user.lastname}.
         </Typography>
         <Typography variant="h5" align="center" color="textSecondary" paragraph>
           Your 3D-Printer is Ready For You.

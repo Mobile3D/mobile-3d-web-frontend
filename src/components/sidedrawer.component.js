@@ -17,6 +17,7 @@ import ControlCameraIcon from '@material-ui/icons/ControlCamera';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 import SettingsIcon from '@material-ui/icons/Settings';
 import { Link } from 'react-router-dom';
+import { UserContext } from '../contexts/user.context';
 
 const useStyles = makeStyles(theme => ({
   list: {
@@ -53,64 +54,68 @@ export default function SideDrawer(props) {
   }
 
   return (
-    <Drawer open={props.open} onClose={ props.onDrawerClose }>
-      <div
-        tabIndex={0}
-        role="button"
-      >
-        <div className={classes.list}>
-          <List>
-            <ListItem button>
-              <ListItemAvatar>
-                <Avatar className={classes.pinkAvatar}>{/* this.context.user.firstname.substring(0, 1) */ 'T'}</Avatar>
-              </ListItemAvatar>
-              <ListItemText
-                primary={/* this.context.user.firstname + ' ' + this.context.user.lastname */ 'Test User'}
-              />
-            </ListItem>
-          </List>
-          <Divider />
-          <List>
-            <Link to="/" className={classes.link} >
-              <ListItem button selected={ props.selectedPage === 'home' }>
-                <ListItemIcon><HomeIcon /></ListItemIcon>
-                <ListItemText primary="Home" />
-              </ListItem>
-            </Link>
-            <Link to="/controls" className={classes.link} >
-              <ListItem button selected={ props.selectedPage === 'controls' }>
-                <ListItemIcon><ControlCameraIcon /></ListItemIcon>
-                <ListItemText primary="Controls" />
-              </ListItem>
-            </Link>
-            <Link to="/upload" className={classes.link} >
-              <ListItem button selected={ props.selectedPage === 'upload' }>
-                <ListItemIcon><CloudUploadIcon /></ListItemIcon>
-                <ListItemText primary="Upload" />
-              </ListItem>
-            </Link>
-            <Link to="/files" className={classes.link} >
-              <ListItem button selected={ props.selectedPage === 'files' }>
-                <ListItemIcon><FolderIcon /></ListItemIcon>
-                <ListItemText primary="Files" />
-              </ListItem>
-            </Link>
-          </List>
-          <Divider />
-          <List>
-            <Link to="/settings" className={classes.link} >
-              <ListItem button selected={ props.selectedPage === 'files' }>
-                <ListItemIcon><SettingsIcon /></ListItemIcon>
-                <ListItemText primary="Settings" />
-              </ListItem>
-            </Link>
-            <ListItem button onClick={handleLogout}>
-              <ListItemIcon><PowerSettingsNewIcon /></ListItemIcon>
-              <ListItemText primary="Logout" />
-            </ListItem>
-          </List>
-        </div>
-      </div>
-    </Drawer>
+    <UserContext.Consumer>
+      {user => (
+        <Drawer open={props.open} onClose={ props.onDrawerClose }>
+          <div
+            tabIndex={0}
+            role="button"
+          >
+            <div className={classes.list}>
+              <List>
+                <ListItem button>
+                  <ListItemAvatar>
+                    <Avatar className={classes.pinkAvatar}>{user.firstname === undefined ? '' : user.firstname.substr(0, 1)}</Avatar>
+                  </ListItemAvatar>
+                  <ListItemText
+                    primary={user.firstname + ' ' + user.lastname}
+                  />
+                </ListItem>
+              </List>
+              <Divider />
+              <List>
+                <Link to="/" className={classes.link} >
+                  <ListItem button selected={ props.selectedPage === 'home' }>
+                    <ListItemIcon><HomeIcon /></ListItemIcon>
+                    <ListItemText primary="Home" />
+                  </ListItem>
+                </Link>
+                <Link to="/controls" className={classes.link} >
+                  <ListItem button selected={ props.selectedPage === 'controls' }>
+                    <ListItemIcon><ControlCameraIcon /></ListItemIcon>
+                    <ListItemText primary="Controls" />
+                  </ListItem>
+                </Link>
+                <Link to="/upload" className={classes.link} >
+                  <ListItem button selected={ props.selectedPage === 'upload' }>
+                    <ListItemIcon><CloudUploadIcon /></ListItemIcon>
+                    <ListItemText primary="Upload" />
+                  </ListItem>
+                </Link>
+                <Link to="/files" className={classes.link} >
+                  <ListItem button selected={ props.selectedPage === 'files' }>
+                    <ListItemIcon><FolderIcon /></ListItemIcon>
+                    <ListItemText primary="Files" />
+                  </ListItem>
+                </Link>
+              </List>
+              <Divider />
+              <List>
+                <Link to="/settings" className={classes.link} >
+                  <ListItem button selected={ props.selectedPage === 'files' }>
+                    <ListItemIcon><SettingsIcon /></ListItemIcon>
+                    <ListItemText primary="Settings" />
+                  </ListItem>
+                </Link>
+                <ListItem button onClick={handleLogout}>
+                  <ListItemIcon><PowerSettingsNewIcon /></ListItemIcon>
+                  <ListItemText primary="Logout" />
+                </ListItem>
+              </List>
+            </div>
+          </div>
+        </Drawer>
+      )}
+    </UserContext.Consumer>
   );
 }

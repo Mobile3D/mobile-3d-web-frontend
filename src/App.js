@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
@@ -12,6 +12,10 @@ import AddAccount from './pages/addaccount.page';
 import Files from './pages/files.page';
 import Upload from './pages/upload.page';
 import Controls from './pages/controls.page';
+
+import { userService } from './services/user.service';
+
+import { UserContext } from './contexts/user.context';
 
 //create consistent theme styling for app
 const theme = createMuiTheme({
@@ -37,73 +41,103 @@ function RedirectToLogin() {
 function App() {
 
   const [authorized, setAuthorized] = useState(true);
+  const [userPromiseResolved, setUserPromiseResolved] = useState(false);
+  const [user, setUser] = useState({});
+
+  useEffect(() => {
+    if (window.localStorage.getItem('token') !== null) {
+      
+      userService.lookup().then((data) => {
+
+        console.log(data);
+
+        if (data._id === undefined) {
+          setAuthorized(false);
+          setUserPromiseResolved(true);
+        } else {
+          setAuthorized(true);
+          data.authorized = true;
+          setUser(data);
+          setUserPromiseResolved(true);
+        }
+
+      });
+
+    }
+  }, []);
 
   return (
     <MuiThemeProvider theme={theme}>
-      <Router>
-        <div>
+      <UserContext.Provider value={user}>
+        <Router>
+          <div>
 
-          { authorized ? (            
-            <Route exact path="/" render={ props => (
-              <Home />
+            { authorized ? (            
+              <Route exact path="/" render={ props => (
+                <UserContext.Consumer>
+                  {user => (
+                    <Home user={user} />
+                  )}
+                </UserContext.Consumer>
+              )} />
+            ) : (<RedirectToLogin />)
+            }
+
+            { authorized ? (            
+              <Route exact path="/controls" render={ props => (
+                <Controls />
+              )} />
+            ) : (<RedirectToLogin />)
+            }
+
+            { authorized ? (            
+              <Route exact path="/upload" render={ props => (
+                <Upload />
+              )} />
+            ) : (<RedirectToLogin />)
+            }
+
+            { authorized ? (            
+              <Route exact path="/files" render={ props => (
+                <Files />
+              )} />
+            ) : (<RedirectToLogin />)
+            }
+
+            { authorized ? (            
+              <Route exact path="/settings" render={ props => (
+                <Settings />
+              )} />
+            ) : (<RedirectToLogin />)
+            }
+
+            { authorized ? (            
+              <Route exact path="/settings/connection" render={ props => (
+                <ConnectionSettings />
+              )} />
+            ) : (<RedirectToLogin />)
+            }
+
+            { authorized ? (            
+              <Route exact path="/settings/accounts" render={ props => (
+                <AccountSettings />
+              )} />
+            ) : (<RedirectToLogin />)
+            }
+
+            { authorized ? (            
+              <Route exact path="/settings/accounts/add" render={ props => (
+                <AddAccount />
+              )} />
+            ) : (<RedirectToLogin />)
+            }
+
+            <Route exact path="/login" render={ props => (
+              <Login />
             )} />
-          ) : (<RedirectToLogin />)
-          }
-
-          { authorized ? (            
-            <Route exact path="/controls" render={ props => (
-              <Controls />
-            )} />
-          ) : (<RedirectToLogin />)
-          }
-
-          { authorized ? (            
-            <Route exact path="/upload" render={ props => (
-              <Upload />
-            )} />
-          ) : (<RedirectToLogin />)
-          }
-
-          { authorized ? (            
-            <Route exact path="/files" render={ props => (
-              <Files />
-            )} />
-          ) : (<RedirectToLogin />)
-          }
-
-          { authorized ? (            
-            <Route exact path="/settings" render={ props => (
-              <Settings />
-            )} />
-          ) : (<RedirectToLogin />)
-          }
-
-          { authorized ? (            
-            <Route exact path="/settings/connection" render={ props => (
-              <ConnectionSettings />
-            )} />
-          ) : (<RedirectToLogin />)
-          }
-
-          { authorized ? (            
-            <Route exact path="/settings/accounts" render={ props => (
-              <AccountSettings />
-            )} />
-          ) : (<RedirectToLogin />)
-          }
-
-          { authorized ? (            
-            <Route exact path="/settings/accounts/add" render={ props => (
-              <AddAccount />
-            )} />
-          ) : (<RedirectToLogin />)
-          }
-
-          <Route exact path="/login" render={ props => (
-            <Login />
-          )} />
-        </div>
-      </Router>
+          </div>
+        </Router>
+      </UserContext.Provider>
     </MuiThemeProvider>
   );
 }
