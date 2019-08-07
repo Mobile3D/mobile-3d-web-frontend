@@ -40,7 +40,7 @@ function RedirectToLogin() {
 
 function App() {
 
-  const [authorized, setAuthorized] = useState(true);
+  const [authorized, setAuthorized] = useState(window.localStorage.getItem('token') !== null ? true : false);
   const [userPromiseResolved, setUserPromiseResolved] = useState(false);
   const [user, setUser] = useState({});
 
@@ -49,10 +49,11 @@ function App() {
       
       userService.lookup().then((data) => {
 
-        console.log(data);
-
         if (data._id === undefined) {
           setAuthorized(false);
+          setUser({
+            authorized: false
+          });
           setUserPromiseResolved(true);
         } else {
           setAuthorized(true);
@@ -133,7 +134,11 @@ function App() {
             }
 
             <Route exact path="/login" render={ props => (
-              <Login />
+              <UserContext.Consumer>
+                { user => (
+                  <Login user={user} />
+                )}
+              </UserContext.Consumer>
             )} />
           </div>
         </Router>
