@@ -12,6 +12,7 @@ import AddAccount from './pages/addaccount.page';
 import Files from './pages/files.page';
 import Upload from './pages/upload.page';
 import Controls from './pages/controls.page';
+import LoadingWithIcon from './pages/loading.page';
 
 import { userService } from './services/user.service';
 
@@ -64,9 +65,23 @@ function App() {
 
       });
 
+    } else {
+      setUser({
+        authorized: false
+      });
+      setUserPromiseResolved(true);
     }
+
   }, []);
 
+  // if data has not been fetched yet
+  if (!userPromiseResolved) {
+    return (
+      <LoadingWithIcon />
+    );
+  }
+
+  // otherwise
   return (
     <MuiThemeProvider theme={theme}>
       <UserContext.Provider value={user}>

@@ -20,7 +20,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default function Loading() {
+export default function LoadingWithIcon() {
   const classes = useStyles();
   
   return (

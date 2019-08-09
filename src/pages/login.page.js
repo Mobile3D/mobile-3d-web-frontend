@@ -10,6 +10,7 @@ import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 import { Redirect } from 'react-router-dom';
+import validator from 'validator';
 
 import Logo from '../images/icon-white.svg';
 import { userService } from '../services/user.service';
@@ -50,6 +51,102 @@ export default function Login() {
   const classes = useStyles();
   const user = useContext(UserContext);
 
+  const [txtUsername, setTxtUsername] = useState('');
+  const [txtPassword, setTxtPassword] = useState('');
+  const [txtPasswordError, setTxtPasswordError] = useState({
+    error: false,
+    message: ''
+  });
+  const [txtUsernameError, setTxtUsernameError] = useState({
+    error: false,
+    message: ''
+  });
+
+  function handleTxtUsernameChange(e) {
+    setTxtUsername(e.target.value);
+    checkTxtUsername(e.target.value);
+  }
+
+  function handleTxtPasswordChange(e) {
+    setTxtPassword(e.target.value);
+    checkTxtPassword(e.target.value);
+  }
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    let valid = true;
+
+    if (!checkTxtUsername(txtUsername)) {
+      valid = false;
+    }
+    if (!checkTxtPassword(txtPassword)) {
+      valid = false;
+    }
+
+    if (valid) {
+      
+      userService.login({
+        username: txtUsername,
+        password: txtPassword
+      }).then((data) => {
+        
+        if (checkResponse(data)) {
+          window.localStorage.setItem('token', data.token);
+          window.location.reload();
+        }
+
+      });
+
+    }
+  }
+
+  function checkTxtUsername(username) {
+    if (validator.isEmpty(username)) {
+      setTxtUsernameError({
+        error: true,
+        message: 'Please enter your username.'
+      });
+      return false;
+    } else {
+      resetTxtUsernameError();
+      return true;
+    }
+  }
+
+  function resetTxtUsernameError() {
+    setTxtUsernameError({
+      error: false,
+      message: ''
+    });
+  }
+
+  function checkTxtPassword(password) {
+    if (validator.isEmpty(password)) {
+      setTxtPasswordError({
+        error: true,
+        message: 'Please enter your password.'
+      });
+      return false;
+    } else {
+      resetTxtPasswordError();
+      return true;
+    }
+  }
+
+  function resetTxtPasswordError() {
+    setTxtPasswordError({
+      error: false,
+      message: ''
+    });
+  }
+
+  function checkResponse(data) {
+    if (data.error === undefined) return true;
+    else {
+      return false;
+    }
+  }
+
   // loading
   if (user.authorized === undefined) {
     return (<div></div>);
@@ -68,28 +165,36 @@ export default function Login() {
             <Typography component="h1" variant="h5">
               Sign In
             </Typography>
-            <form className={classes.form} noValidate>
+            <form className={classes.form} onSubmit={handleSubmit} noValidate>
               <TextField
                 variant="outlined"
                 margin="normal"
                 required
                 fullWidth
-                id="username"
+                id="txtUsername"
                 label="Username"
-                name="username"
+                name="txtUsername"
                 autoComplete="username"
                 autoFocus
+                onChange={handleTxtUsernameChange}
+                value={txtUsername}
+                error={txtUsernameError.error}
+                helperText={txtUsernameError.message}
               />
               <TextField
                 variant="outlined"
                 margin="normal"
                 required
                 fullWidth
-                name="password"
+                name="txtPassword"
                 label="Password"
                 type="password"
-                id="password"
+                id="txtPassword"
                 autoComplete="current-password"
+                onChange={handleTxtPasswordChange}
+                value={txtPassword}
+                error={txtPasswordError.error}
+                helperText={txtPasswordError.message}
               />
               <FormControlLabel
                 control={<Checkbox value="remember" color="primary" />}
