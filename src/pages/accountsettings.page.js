@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Typography from '@material-ui/core/Typography';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -13,9 +13,12 @@ import Fab from '@material-ui/core/Fab';
 import AddIcon from '@material-ui/icons/Add';
 import { makeStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
+import { Hidden } from '@material-ui/core';
 
 import Dashboard from '../components/dashboard.component';
-import { Hidden } from '@material-ui/core';
+import Spinner from '../components/spinner.component';
+import Snackbar from '../components/snackbar.component';
+import { userService } from '../services/user.service';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -84,22 +87,39 @@ const useStyles = makeStyles(theme => ({
 export default function AccountSettings(props) {
   const classes = useStyles();
 
-  const [accounts, setAccounts] = useState([
-    {
-      _id: 1,
-      username: 'testuser',
-      firstname: 'Test',
-      lastname: 'User',
-      admin: true
-    },
-    {
-      _id: 2,
-      username: 'testuser2',
-      firstname: 'Test',
-      lastname: 'User 2',
-      admin: true
-    },
-  ]);
+  const [accounts, setAccounts] = useState([]);
+  const [userPromiseResolved, setUserPromiseResolved] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState({
+    type: 'info',
+    message: ''
+  });
+
+  const snackbar = useRef();
+
+  useEffect(() => {
+    userService.getAll().then((data) => {
+      if (checkResponse(data)) {
+        setAccounts(data);
+      }
+      setUserPromiseResolved(true);
+    });
+  }, []);
+
+  const checkResponse = (data) => {
+    if (data.error === undefined) return true;
+    else {
+      
+      if (data.error.code === 'ER_INTERNAL') {
+        setSnackbarMessage({
+          type: 'error',
+          message: 'An internal error occured. Please try again in a few seconds.'
+        });
+      }
+
+      snackbar.current.handleOpen();
+
+    }
+  }
 
   return (
     <Dashboard navTitle="Account Settings">
@@ -112,38 +132,43 @@ export default function AccountSettings(props) {
         <Typography component="h5" variant="h5" align="center" color="textPrimary" gutterBottom>
           Accounts
         </Typography>
-        <Paper className={classes.table}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Username</TableCell>
-                <Hidden xsDown={true}>
-                  <TableCell>Firstname</TableCell>
-                  <TableCell>Lastname</TableCell>
-                </Hidden>
-                <TableCell align="right">Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {accounts.map(row => (
-                <TableRow className={classes.rowHover} key={row._id}>
-                  <TableCell component="th" scope="row">
-                    {row.username}
-                  </TableCell>
+        { userPromiseResolved ? (
+          <Paper className={classes.table}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Username</TableCell>
                   <Hidden xsDown={true}>
-                    <TableCell>{row.firstname}</TableCell>
-                    <TableCell>{row.lastname}</TableCell>
+                    <TableCell>Firstname</TableCell>
+                    <TableCell>Lastname</TableCell>
                   </Hidden>
-                  <TableCell align="right">
-                    <IconButton onClick={(e) => props.onDeleteClick(e, row)} aria-label="Delete">
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
-                  </TableCell>
+                  <TableCell align="right">Actions</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Paper>
+              </TableHead>
+              <TableBody>
+                {accounts.map(row => (
+                  <TableRow className={classes.rowHover} key={row._id}>
+                    <TableCell component="th" scope="row">
+                      {row.username}
+                    </TableCell>
+                    <Hidden xsDown={true}>
+                      <TableCell>{row.firstname}</TableCell>
+                      <TableCell>{row.lastname}</TableCell>
+                    </Hidden>
+                    <TableCell align="right">
+                      <IconButton onClick={(e) => props.onDeleteClick(e, row)} aria-label="Delete">
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Paper>
+        ) : (
+          <Spinner/>
+        )}
+        
         <div className={classes.centering}>
           <Button className={classes.button} onClick={() => {window.history.back()}} >Back</Button>
         </div>
@@ -154,6 +179,11 @@ export default function AccountSettings(props) {
           </Fab>
         </Link>
       </div>
+      <Snackbar 
+        message={snackbarMessage.message} 
+        variant={snackbarMessage.type}
+        ref={snackbar} 
+      />
     </Dashboard>
   );
 }

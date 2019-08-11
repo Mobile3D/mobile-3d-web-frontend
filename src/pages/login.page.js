@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useContext, useRef } from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -15,6 +15,7 @@ import validator from 'validator';
 import Logo from '../images/icon-white.svg';
 import { userService } from '../services/user.service';
 import { UserContext } from '../contexts/user.context';
+import Snackbar from '../components/snackbar.component';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -61,6 +62,12 @@ export default function Login() {
     error: false,
     message: ''
   });
+  const [formMessage, setFormMessage] = useState({
+    type: 'info',
+    message: ''
+  });
+
+  const snackbar = useRef();
 
   function handleTxtUsernameChange(e) {
     setTxtUsername(e.target.value);
@@ -82,7 +89,7 @@ export default function Login() {
     if (!checkTxtPassword(txtPassword)) {
       valid = false;
     }
-
+    
     if (valid) {
       
       userService.login({
@@ -143,6 +150,26 @@ export default function Login() {
   function checkResponse(data) {
     if (data.error === undefined) return true;
     else {
+
+      if (data.error.code === 'ER_INVALID_LOGIN') {
+        setFormMessage({
+          type: 'error',
+          message: 'Your username or password is invalid.'
+        });
+      } else if (data.error.code === 'ER_INTERNAL') {
+        setFormMessage({
+          type: 'error',
+          message: 'An internal error occured. Please try again in a few seconds.'
+        });
+      } else if (data.error.code === 'ER_MISSING_PARAMS') {
+        setFormMessage({
+          type: 'error',
+          message: 'Some parameters are missing.'
+        });
+      }
+
+      snackbar.current.handleOpen();
+
       return false;
     }
   }
@@ -221,6 +248,11 @@ export default function Login() {
             </form>
           </div>
         </Grid>
+        <Snackbar 
+          message={formMessage.message} 
+          variant={formMessage.type}
+          ref={snackbar} 
+        />
       </Grid>
     );
   }

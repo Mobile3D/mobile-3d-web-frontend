@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
 import Login from './pages/login.page';
-import Loading from './pages/loading.page';
 import Home from './pages/home.page';
 import Settings from './pages/settings.page';
 import AccountSettings from './pages/accountsettings.page';

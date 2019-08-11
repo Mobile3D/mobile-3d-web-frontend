@@ -6,7 +6,7 @@ export const apiHelper = {
 };
 
 function getUrl() {
-  return 'http://localhost:4000/api/v1';
+  return 'http://10.0.0.146:4000/api/v1';
 }
 
 function getDefaultHeaders() {
