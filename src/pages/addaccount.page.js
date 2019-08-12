@@ -7,6 +7,7 @@ import FormControl from '@material-ui/core/FormControl';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import validator from 'validator';
+import { Redirect } from 'react-router-dom';
 
 import Dashboard from '../components/dashboard.component';
 import Snackbar from '../components/snackbar.component';
@@ -70,6 +71,7 @@ const useStyles = makeStyles(theme => ({
 export default function AddAccount() {
   const classes = useStyles();
 
+  const [userAdded, setUserAdded] = useState(false);
   const [txtFirstname, setTxtFirstname] = useState('');
   const [txtLastname, setTxtLastname] = useState('');
   const [txtUsername, setTxtUsername] = useState('');
@@ -144,7 +146,7 @@ export default function AddAccount() {
         admin: true
       }).then((data) => {
         if (checkResponse(data)) {
-          console.log('okay');
+          setUserAdded(true);
         }
       });
     }
@@ -260,7 +262,11 @@ export default function AddAccount() {
     }
   }
 
-  return (
+  return userAdded ? (<Redirect exact to={{
+      pathname: '/settings/accounts',
+      state: { userAdded: true }
+    }}/>
+  ) : (
     <Dashboard navTitle="Account Settings">
       <main className={classes.main}>
         <CssBaseline />
