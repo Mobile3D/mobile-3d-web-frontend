@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Typography from '@material-ui/core/Typography';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -14,9 +14,12 @@ import Fab from '@material-ui/core/Fab';
 import AddIcon from '@material-ui/icons/Add';
 import { makeStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
+import { Hidden } from '@material-ui/core';
 
 import Dashboard from '../components/dashboard.component';
-import { Hidden } from '@material-ui/core';
+import Snackbar from '../components/snackbar.component';
+import Spinner from '../components/spinner.component';
+import { uploadService } from '../services/uploads.service';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -77,18 +80,39 @@ const useStyles = makeStyles(theme => ({
 export default function Files(props) {
   const classes = useStyles();
 
-  const [files, setFiles] = useState([
-    {
-      _id: 1,
-      name: 't1',
-      size: 1443000
-    },
-    {
-      _id: 2,
-      name: 't2',
-      size: 3242000
-    },
-  ]);
+  const [uploads, setUploads] = useState([]);
+  const [uploadPromiseResolved, setUploadPromiseResolved] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState({
+    type: 'info',
+    message: ''
+  });
+
+  const snackbar = useRef();
+
+  useEffect(() => {
+    uploadService.getAll().then((data) => {
+      if (checkResponse(data)) {
+        setUploads(data);
+      }
+      setUploadPromiseResolved(true);
+    });
+  }, [])
+
+  const checkResponse = (data) => {
+    if (data.error === undefined) return true;
+    else {
+      
+      if (data.error.code === 'ER_INTERNAL') {
+        setSnackbarMessage({
+          type: 'error',
+          message: 'An internal error occured. Please try again in a few seconds.'
+        });
+      }
+
+      snackbar.current.handleOpen();
+
+    }
+  }
 
   return (
     <Dashboard navTitle="Files">
@@ -98,42 +122,52 @@ export default function Files(props) {
         </Typography>
       </div>
       <div className={classes.tableRoot}>
-        <Paper className={classes.table}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Name</TableCell>
-                <Hidden xsDown={true}>
-                  <TableCell>Size</TableCell>
-                </Hidden>
-                <TableCell align="right">Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {files.map(row => (
-                <TableRow className={classes.rowHover} key={row._id}>
-                  <TableCell component="th" scope="row">
-                    {row.name}
-                  </TableCell>
+
+        { uploadPromiseResolved && uploads.length === 0 ? (
+          <Typography component="h5" variant="h5" align="center" color="textPrimary" gutterBottom>
+            Upload some files to print them.
+          </Typography>
+        ) : uploadPromiseResolved && uploads.length > 0 ? (
+          <Paper className={classes.table}>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Name</TableCell>
                   <Hidden xsDown={true}>
-                    <TableCell>{(row.size / 1000) + ' KB'}</TableCell>
+                    <TableCell>Size</TableCell>
                   </Hidden>
-                  <TableCell align="right">
-                    <IconButton className={classes.button} aria-label="Print">
-                      <PrintIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton className={classes.button} aria-label="Download">
-                      <SaveAltIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton className={classes.button} onClick={(e) => props.onDeleteClick(e, row)} aria-label="Delete">
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
-                  </TableCell>
+                  <TableCell align="right">Actions</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Paper>
+              </TableHead>
+              <TableBody>
+                {uploads.map(row => (
+                  <TableRow className={classes.rowHover} key={row._id}>
+                    <TableCell component="th" scope="row">
+                      {row.name}
+                    </TableCell>
+                    <Hidden xsDown={true}>
+                      <TableCell>{(row.size / 1000) + ' KB'}</TableCell>
+                    </Hidden>
+                    <TableCell align="right">
+                      <IconButton className={classes.button} aria-label="Print">
+                        <PrintIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton className={classes.button} aria-label="Download">
+                        <SaveAltIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton className={classes.button} onClick={(e) => props.onDeleteClick(e, row)} aria-label="Delete">
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Paper>
+        ) : !uploadPromiseResolved ? (
+          <Spinner/>
+        ) : ''}
+        
         <Link to="/upload" className={classes.link} >
           <Fab variant="extended" size="large" color="primary" aria-label="Add" className={classes.fab}>
             <AddIcon />
@@ -141,6 +175,11 @@ export default function Files(props) {
           </Fab>
         </Link>
       </div>
+      <Snackbar 
+        message={snackbarMessage.message} 
+        variant={snackbarMessage.type}
+        ref={snackbar} 
+      />
     </Dashboard>
   );
 }

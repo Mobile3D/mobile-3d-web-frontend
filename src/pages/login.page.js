@@ -13,7 +13,7 @@ import { Redirect } from 'react-router-dom';
 import validator from 'validator';
 
 import Logo from '../images/icon-white.svg';
-import { userService } from '../services/user.service';
+import { userService } from '../services/users.service';
 import { UserContext } from '../contexts/user.context';
 import Snackbar from '../components/snackbar.component';
 
@@ -54,15 +54,15 @@ export default function Login() {
 
   const [txtUsername, setTxtUsername] = useState('');
   const [txtPassword, setTxtPassword] = useState('');
-  const [txtPasswordError, setTxtPasswordError] = useState({
-    error: false,
-    message: ''
-  });
   const [txtUsernameError, setTxtUsernameError] = useState({
     error: false,
     message: ''
   });
-  const [formMessage, setFormMessage] = useState({
+  const [txtPasswordError, setTxtPasswordError] = useState({
+    error: false,
+    message: ''
+  });
+  const [snackbarMessage, setSnackbarMessage] = useState({
     type: 'info',
     message: ''
   });
@@ -152,19 +152,24 @@ export default function Login() {
     else {
 
       if (data.error.code === 'ER_INVALID_LOGIN') {
-        setFormMessage({
+        setSnackbarMessage({
           type: 'error',
           message: 'Your username or password is invalid.'
         });
       } else if (data.error.code === 'ER_INTERNAL') {
-        setFormMessage({
+        setSnackbarMessage({
           type: 'error',
           message: 'An internal error occured. Please try again in a few seconds.'
         });
       } else if (data.error.code === 'ER_MISSING_PARAMS') {
-        setFormMessage({
+        setSnackbarMessage({
           type: 'error',
           message: 'Some parameters are missing.'
+        });
+      } else {
+        setSnackbarMessage({
+          type: 'error',
+          message: 'An unknown error occured.'
         });
       }
 
@@ -249,8 +254,8 @@ export default function Login() {
           </div>
         </Grid>
         <Snackbar 
-          message={formMessage.message} 
-          variant={formMessage.type}
+          message={snackbarMessage.message} 
+          variant={snackbarMessage.type}
           ref={snackbar} 
         />
       </Grid>

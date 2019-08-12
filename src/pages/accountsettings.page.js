@@ -18,7 +18,7 @@ import { Hidden } from '@material-ui/core';
 import Dashboard from '../components/dashboard.component';
 import Spinner from '../components/spinner.component';
 import Snackbar from '../components/snackbar.component';
-import { userService } from '../services/user.service';
+import { userService } from '../services/users.service';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -132,7 +132,7 @@ export default function AccountSettings(props) {
         <Typography component="h5" variant="h5" align="center" color="textPrimary" gutterBottom>
           Accounts
         </Typography>
-        { userPromiseResolved ? (
+        { userPromiseResolved && accounts.length > 0 ? (
           <Paper className={classes.table}>
             <Table>
               <TableHead>

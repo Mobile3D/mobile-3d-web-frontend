@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -6,8 +6,11 @@ import Paper from '@material-ui/core/Paper';
 import FormControl from '@material-ui/core/FormControl';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
+import validator from 'validator';
 
 import Dashboard from '../components/dashboard.component';
+import Snackbar from '../components/snackbar.component';
+import { userService } from '../services/users.service';
 
 const useStyles = makeStyles(theme => ({
   main: {
@@ -71,25 +74,190 @@ export default function AddAccount() {
   const [txtLastname, setTxtLastname] = useState('');
   const [txtUsername, setTxtUsername] = useState('');
   const [txtPassword, setTxtPassword] = useState('');
+  const [txtFirstnameError, setTxtFirstnameError] = useState({
+    error: false,
+    message: ''
+  });
+  const [txtLastnameError, setTxtLastnameError] = useState({
+    error: false,
+    message: ''
+  });
+  const [txtUsernameError, setTxtUsernameError] = useState({
+    error: false,
+    message: ''
+  });
+  const [txtPasswordError, setTxtPasswordError] = useState({
+    error: false,
+    message: ''
+  });
+  const [snackbarMessage, setSnackbarMessage] = useState({
+    type: 'info',
+    message: ''
+  });
+
+  const snackbar = useRef();
 
   function handleTxtFirstnameChange(e) {
     setTxtFirstname(e.target.value);
+    checkTxtFirstname(e.target.value);
   }
 
   function handleTxtLastnameChange(e) {
     setTxtLastname(e.target.value);
+    checkTxtLastname(e.target.value);
   }
 
   function handleTxtUsernameChange(e) {
     setTxtUsername(e.target.value);
+    checkTxtUsername(e.target.value);
   }
 
   function handleTxtPasswordChange(e) {
     setTxtPassword(e.target.value);
+    checkTxtPassword(e.target.value);
   }
 
   function handleSubmit(e) {
     e.preventDefault();
+
+    let valid = true;
+
+    if (!checkTxtFirstname(txtFirstname)) {
+      valid = false;
+    }
+    if (!checkTxtLastname(txtLastname)) {
+      valid = false;
+    }
+    if (!checkTxtUsername(txtUsername)) {
+      valid = false;
+    }
+    if (!checkTxtPassword(txtPassword)) {
+      valid = false;
+    }
+    
+    if (valid) {
+      userService.add({
+        firstname: txtFirstname,
+        lastname: txtLastname,
+        username: txtUsername,
+        password: txtPassword,
+        admin: true
+      }).then((data) => {
+        if (checkResponse(data)) {
+          console.log('okay');
+        }
+      });
+    }
+  }
+
+  function checkTxtFirstname(firstname) {
+    if (validator.isEmpty(firstname)) {
+      setTxtFirstnameError({
+        error: true,
+        message: 'Please enter a firstname.'
+      });
+      return false;
+    } else {
+      resetTxtFirstnameError();
+      return true;
+    }
+  }
+
+  function resetTxtFirstnameError() {
+    setTxtFirstnameError({
+      error: false,
+      message: ''
+    });
+  }
+
+  function checkTxtLastname(lastname) {
+    if (validator.isEmpty(lastname)) {
+      setTxtLastnameError({
+        error: true,
+        message: 'Please enter a lastname.'
+      });
+      return false;
+    } else {
+      resetTxtLastnameError();
+      return true;
+    }
+  }
+
+  function resetTxtLastnameError() {
+    setTxtLastnameError({
+      error: false,
+      message: ''
+    });
+  }
+
+  function checkTxtUsername(username) {
+    if (validator.isEmpty(username)) {
+      setTxtUsernameError({
+        error: true,
+        message: 'Please enter a username.'
+      });
+      return false;
+    } else {
+      resetTxtUsernameError();
+      return true;
+    }
+  }
+
+  function resetTxtUsernameError() {
+    setTxtUsernameError({
+      error: false,
+      message: ''
+    });
+  }
+
+  function checkTxtPassword(password) {
+    if (validator.isEmpty(password)) {
+      setTxtPasswordError({
+        error: true,
+        message: 'Please enter a password.'
+      });
+      return false;
+    } else {
+      resetTxtPasswordError();
+      return true;
+    }
+  }
+
+  function resetTxtPasswordError() {
+    setTxtPasswordError({
+      error: false,
+      message: ''
+    });
+  }
+
+  function checkResponse(data) {
+    if (data.error === undefined) return true;
+    else {
+      if (data.error.code === 'ER_USERNAME_TAKEN') {
+        setSnackbarMessage({
+          type: 'error',
+          message: 'The username you entered is already taken.'
+        });
+      } else if (data.error.code === 'ER_INTERNAL') {
+        setSnackbarMessage({
+          type: 'error',
+          message: 'An internal error occured. Please try again in a few seconds.'
+        });
+      } else if (data.error.code === 'ER_MISSING_PARAMS') {
+        setSnackbarMessage({
+          type: 'error',
+          message: 'Some parameters are missing.'
+        });
+      } else {
+        setSnackbarMessage({
+          type: 'error',
+          message: 'An unknown error occured.'
+        });
+      }
+
+      snackbar.current.handleOpen();
+      return false;
+    }
   }
 
   return (
@@ -112,6 +280,8 @@ export default function AddAccount() {
                 variant="outlined" 
                 value={txtFirstname}
                 onChange={handleTxtFirstnameChange}
+                error={txtFirstnameError.error}
+                helperText={txtFirstnameError.message}
 
               />
             </FormControl>
@@ -126,6 +296,8 @@ export default function AddAccount() {
                 variant="outlined" 
                 value={txtLastname}
                 onChange={handleTxtLastnameChange}
+                error={txtLastnameError.error}
+                helperText={txtLastnameError.message}
 
               />
             </FormControl>
@@ -140,6 +312,8 @@ export default function AddAccount() {
                 variant="outlined" 
                 value={txtUsername}
                 onChange={handleTxtUsernameChange}
+                error={txtUsernameError.error}
+                helperText={txtUsernameError.message}
 
               />
             </FormControl>
@@ -154,6 +328,8 @@ export default function AddAccount() {
                 variant="outlined" 
                 value={txtPassword}
                 onChange={handleTxtPasswordChange}
+                error={txtPasswordError.error}
+                helperText={txtPasswordError.message}
 
               />
             </FormControl>
@@ -173,6 +349,11 @@ export default function AddAccount() {
             <Button className={classes.button} onClick={() => {window.history.back()}} >Back</Button>
           </div>
       </main>
+      <Snackbar 
+        message={snackbarMessage.message} 
+        variant={snackbarMessage.type}
+        ref={snackbar} 
+      />
     </Dashboard>
   );
 }

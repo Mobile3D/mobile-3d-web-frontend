@@ -13,7 +13,7 @@ import Upload from './pages/upload.page';
 import Controls from './pages/controls.page';
 import LoadingWithIcon from './pages/loading.page';
 
-import { userService } from './services/user.service';
+import { userService } from './services/users.service';
 
 import { UserContext } from './contexts/user.context';
 
@@ -76,7 +76,9 @@ function App() {
   // if data has not been fetched yet
   if (!userPromiseResolved) {
     return (
-      <LoadingWithIcon />
+      <MuiThemeProvider theme={theme}>
+        <LoadingWithIcon />
+      </MuiThemeProvider>
     );
   }
 
