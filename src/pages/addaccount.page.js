@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useContext } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -12,6 +12,7 @@ import { Redirect } from 'react-router-dom';
 import Dashboard from '../components/dashboard.component';
 import Snackbar from '../components/snackbar.component';
 import { userService } from '../services/users.service';
+import { AccountsContext } from '../contexts/accounts.context';
 
 const useStyles = makeStyles(theme => ({
   main: {
@@ -70,6 +71,8 @@ const useStyles = makeStyles(theme => ({
 
 export default function AddAccount() {
   const classes = useStyles();
+  const accounts = useContext(AccountsContext);
+  const snackbar = useRef();
 
   const [userAdded, setUserAdded] = useState(false);
   const [txtFirstname, setTxtFirstname] = useState('');
@@ -96,8 +99,6 @@ export default function AddAccount() {
     type: 'info',
     message: ''
   });
-
-  const snackbar = useRef();
 
   function handleTxtFirstnameChange(e) {
     setTxtFirstname(e.target.value);
@@ -146,7 +147,12 @@ export default function AddAccount() {
         admin: true
       }).then((data) => {
         if (checkResponse(data)) {
-          setUserAdded(true);
+          accounts.new = true;
+          accounts.username = data.username;
+          setUserAdded({
+            success: true,
+            username: data.username
+          });
         }
       });
     }
@@ -262,10 +268,7 @@ export default function AddAccount() {
     }
   }
 
-  return userAdded ? (<Redirect exact to={{
-      pathname: '/settings/accounts',
-      state: { userAdded: true }
-    }}/>
+  return userAdded ? (<Redirect exact to="/settings/accounts"/>
   ) : (
     <Dashboard navTitle="Account Settings">
       <main className={classes.main}>

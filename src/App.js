@@ -89,63 +89,49 @@ function App() {
         <Router>
           <div>
 
-            { authorized ? (            
-              <Route exact path="/" render={ props => (
+            { authorized ? (
+              <div>  
                 <UserContext.Consumer>
                   {user => (
-                    <Home user={user} />
+                    <div>
+
+                      <Route exact path="/" render={ props => (                        
+                        <Home user={user} />        
+                      )} />
+
+                      <Route exact path="/controls" render={ props => (
+                        <Controls />
+                      )} />
+
+                      <Route exact path="/upload" render={ props => (
+                        <Upload />
+                      )} />
+
+                      <Route exact path="/files" render={ props => (
+                        <Files />
+                      )} />
+
+                      <Route exact path="/settings" render={ props => (
+                        <Settings />
+                      )} />
+
+                      <Route exact path="/settings/connection" render={ props => (
+                        <ConnectionSettings />
+                      )} />
+
+                      <Route exact path="/settings/accounts" render={ props => (
+                        <AccountSettings {...props} />
+                      )} />
+
+                      <Route exact path="/settings/accounts/add" render={ props => (
+                        <AddAccount {...props} />
+                      )} />
+
+                    </div> 
                   )}
                 </UserContext.Consumer>
-              )} />
-            ) : (<RedirectToLogin />)
-            }
 
-            { authorized ? (            
-              <Route exact path="/controls" render={ props => (
-                <Controls />
-              )} />
-            ) : (<RedirectToLogin />)
-            }
-
-            { authorized ? (            
-              <Route exact path="/upload" render={ props => (
-                <Upload />
-              )} />
-            ) : (<RedirectToLogin />)
-            }
-
-            { authorized ? (            
-              <Route exact path="/files" render={ props => (
-                <Files />
-              )} />
-            ) : (<RedirectToLogin />)
-            }
-
-            { authorized ? (            
-              <Route exact path="/settings" render={ props => (
-                <Settings />
-              )} />
-            ) : (<RedirectToLogin />)
-            }
-
-            { authorized ? (            
-              <Route exact path="/settings/connection" render={ props => (
-                <ConnectionSettings />
-              )} />
-            ) : (<RedirectToLogin />)
-            }
-
-            { authorized ? (            
-              <Route exact path="/settings/accounts" render={ props => (
-                <AccountSettings />
-              )} />
-            ) : (<RedirectToLogin />)
-            }
-
-            { authorized ? (            
-              <Route exact path="/settings/accounts/add" render={ props => (
-                <AddAccount />
-              )} />
+              </div>
             ) : (<RedirectToLogin />)
             }
 
@@ -156,6 +142,7 @@ function App() {
                 )}
               </UserContext.Consumer>
             )} />
+
           </div>
         </Router>
       </UserContext.Provider>

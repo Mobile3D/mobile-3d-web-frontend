@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import Typography from '@material-ui/core/Typography';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -19,6 +19,7 @@ import Dashboard from '../components/dashboard.component';
 import Spinner from '../components/spinner.component';
 import Snackbar from '../components/snackbar.component';
 import { userService } from '../services/users.service';
+import { AccountsContext } from '../contexts/accounts.context';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -86,6 +87,7 @@ const useStyles = makeStyles(theme => ({
 
 export default function AccountSettings(props) {
   const classes = useStyles();
+  const accountsContext = useContext(AccountsContext);
 
   const [accounts, setAccounts] = useState([]);
   const [userPromiseResolved, setUserPromiseResolved] = useState(false);
@@ -100,6 +102,17 @@ export default function AccountSettings(props) {
     userService.getAll().then((data) => {
       if (checkResponse(data)) {
         setAccounts(data);
+        
+        if (accountsContext.new) {
+          setSnackbarMessage({
+            type: 'success',
+            message: 'User "' + accountsContext.username + '" successfully added.'
+          });
+          accountsContext.new = false;
+          accountsContext.username = '';
+          snackbar.current.handleOpen();
+        }
+
       }
       setUserPromiseResolved(true);
     });

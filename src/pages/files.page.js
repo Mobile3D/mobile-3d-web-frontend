@@ -143,7 +143,7 @@ export default function Files(props) {
                 {uploads.map(row => (
                   <TableRow className={classes.rowHover} key={row._id}>
                     <TableCell component="th" scope="row">
-                      {row.name}
+                      {row.filename}
                     </TableCell>
                     <Hidden xsDown={true}>
                       <TableCell>{(row.size / 1000) + ' KB'}</TableCell>

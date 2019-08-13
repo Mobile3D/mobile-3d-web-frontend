@@ -3,10 +3,11 @@ export const apiHelper = {
   getDefaultHeaders,
   getHeaders,
   checkToken,
+  checkAuth
 };
 
 function getUrl() {
-  return 'http://10.0.0.146:4000/api/v1';
+  return 'http://localhost:4000/api/v1';
 }
 
 function getDefaultHeaders() {
@@ -26,4 +27,11 @@ function checkToken(error) {
   if (error.code === 'ER_TOKEN_EXPIRED') {
     window.location.reload();
   }
+}
+
+function checkAuth() {
+  if (window.localStorage.getItem('token') !== null || window.sessionStorage.getItem('token') !== null) {
+    return true;
+  } 
+  return false;
 }
