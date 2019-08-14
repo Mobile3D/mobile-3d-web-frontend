@@ -6,6 +6,7 @@ import CardContent from '@material-ui/core/CardContent';
 import Typography from '@material-ui/core/Typography';
 import SettingsIcon from '@material-ui/icons/Settings';
 import LaunchIcon from '@material-ui/icons/Launch';
+import PrintIcon from '@material-ui/icons/Print';
 import SignalCellularAltIcon from '@material-ui/icons/SignalCellularAlt';
 import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
 import InfoIcon from '@material-ui/icons/Info';
@@ -34,7 +35,9 @@ function SelectIcon(props) {
     return (<SignalCellularAltIcon color="primary" style={{ fontSize: 60 }} />);
   } else if (props.action === 'info') {
     return (<InfoIcon color="primary" style={{ fontSize: 60 }} />);
-  }  else {
+  } else if (props.action === 'printer') {
+    return (<PrintIcon color="primary" style={{ fontSize: 60 }} />);
+  } else {
     return (<LaunchIcon color="primary" style={{ fontSize: 60 }} />);
   }
 }

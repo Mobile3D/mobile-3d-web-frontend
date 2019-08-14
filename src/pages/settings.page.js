@@ -54,6 +54,11 @@ export default function Settings() {
               </Link>
             </Grid>
             <Grid item>
+              <Link to="/settings/printer" className={classes.link} >
+                <SettingsCard action="printer" title="Printer" />
+              </Link>
+            </Grid>
+            <Grid item>
               <Link to="/settings/accounts" className={classes.link} >
                 <SettingsCard action="accounts" title="Accounts" />
               </Link>

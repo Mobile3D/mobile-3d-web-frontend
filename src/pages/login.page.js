@@ -15,6 +15,7 @@ import validator from 'validator';
 import Logo from '../images/icon-white.svg';
 import { userService } from '../services/users.service';
 import { UserContext } from '../contexts/user.context';
+import { checkResponse } from '../helpers/api.helper';
 import Snackbar from '../components/snackbar.component';
 
 const useStyles = makeStyles(theme => ({
@@ -96,10 +97,18 @@ export default function Login() {
         username: txtUsername,
         password: txtPassword
       }).then((data) => {
+
+        const responseCheck = checkResponse(data);
         
-        if (checkResponse(data)) {
+        if (responseCheck.valid) {
           window.localStorage.setItem('token', data.token);
           window.location.reload();
+        } else {
+          setSnackbarMessage({
+            type: responseCheck.type,
+            message: responseCheck.message
+          });
+          snackbar.current.handleOpen();
         }
 
       });
@@ -145,38 +154,6 @@ export default function Login() {
       error: false,
       message: ''
     });
-  }
-
-  function checkResponse(data) {
-    if (data.error === undefined) return true;
-    else {
-
-      if (data.error.code === 'ER_INVALID_LOGIN') {
-        setSnackbarMessage({
-          type: 'error',
-          message: 'Your username or password is invalid.'
-        });
-      } else if (data.error.code === 'ER_INTERNAL') {
-        setSnackbarMessage({
-          type: 'error',
-          message: 'An internal error occured. Please try again in a few seconds.'
-        });
-      } else if (data.error.code === 'ER_MISSING_PARAMS') {
-        setSnackbarMessage({
-          type: 'error',
-          message: 'Some parameters are missing.'
-        });
-      } else {
-        setSnackbarMessage({
-          type: 'error',
-          message: 'An unknown error occured.'
-        });
-      }
-
-      snackbar.current.handleOpen();
-
-      return false;
-    }
   }
 
   // loading

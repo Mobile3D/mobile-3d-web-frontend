@@ -13,6 +13,7 @@ import Dashboard from '../components/dashboard.component';
 import Snackbar from '../components/snackbar.component';
 import { userService } from '../services/users.service';
 import { AccountsContext } from '../contexts/accounts.context';
+import { checkResponse } from '../helpers/api.helper';
 
 const useStyles = makeStyles(theme => ({
   main: {
@@ -146,14 +147,24 @@ export default function AddAccount() {
         password: txtPassword,
         admin: true
       }).then((data) => {
-        if (checkResponse(data)) {
+
+        const responseCheck = checkResponse(data);
+
+        if (responseCheck.valid) {
           accounts.new = true;
           accounts.username = data.username;
           setUserAdded({
             success: true,
             username: data.username
           });
+        } else {
+          setSnackbarMessage({
+            type: responseCheck.type,
+            message: responseCheck.message
+          });
+          snackbar.current.handleOpen();
         }
+
       });
     }
   }
@@ -236,36 +247,6 @@ export default function AddAccount() {
       error: false,
       message: ''
     });
-  }
-
-  function checkResponse(data) {
-    if (data.error === undefined) return true;
-    else {
-      if (data.error.code === 'ER_USERNAME_TAKEN') {
-        setSnackbarMessage({
-          type: 'error',
-          message: 'The username you entered is already taken.'
-        });
-      } else if (data.error.code === 'ER_INTERNAL') {
-        setSnackbarMessage({
-          type: 'error',
-          message: 'An internal error occured. Please try again in a few seconds.'
-        });
-      } else if (data.error.code === 'ER_MISSING_PARAMS') {
-        setSnackbarMessage({
-          type: 'error',
-          message: 'Some parameters are missing.'
-        });
-      } else {
-        setSnackbarMessage({
-          type: 'error',
-          message: 'An unknown error occured.'
-        });
-      }
-
-      snackbar.current.handleOpen();
-      return false;
-    }
   }
 
   return userAdded ? (<Redirect exact to="/settings/accounts"/>

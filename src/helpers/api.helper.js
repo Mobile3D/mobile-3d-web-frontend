@@ -35,3 +35,47 @@ function checkAuth() {
   } 
   return false;
 }
+
+export function checkResponse(data) {
+  if (data.error === undefined) return { valid: true };
+  else {
+
+    if (data.error.code === 'ER_INVALID_LOGIN') {
+      return {
+        valid: false,
+        type: 'error',
+        message: 'Your username or password is invalid.'
+      };
+    } else if (data.error.code === 'ER_USERNAME_TAKEN') {
+      return {
+        valid: false,
+        type: 'error',
+        message: 'The username you entered is already taken.'
+      };
+    } else if (data.error.code === 'ER_MISSING_PARAMS') {
+      return {
+        valid: false,
+        type: 'error',
+        message: 'Some parameters are missing.'
+      };
+    } else if (data.error.code === 'ER_INTERNAL') {
+      return {
+        valid: false,
+        type: 'error',
+        message: 'An internal error occured. Please try again in a few seconds.'
+      };
+    } else if (data.error.code === 'ER_TOO_MANY_REQUESTS') {
+      return {
+        valid: false,
+        type: 'error',
+        message: 'Too many requests. Please wait a few seconds and try again.'
+      };
+    } else {
+      return {
+        valid: false,
+        type: 'error',
+        message: 'An unknown error occured.'
+      };
+    }
+  }
+}

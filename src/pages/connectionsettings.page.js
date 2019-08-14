@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -6,8 +6,12 @@ import Paper from '@material-ui/core/Paper';
 import FormControl from '@material-ui/core/FormControl';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
+import validator from 'validator';
 
 import Dashboard from '../components/dashboard.component';
+import Snackbar from '../components/snackbar.component';
+import { connectionService } from '../services/connection.service';
+import { checkResponse } from '../helpers/api.helper';
 
 const useStyles = makeStyles(theme => ({
   main: {
@@ -66,20 +70,135 @@ const useStyles = makeStyles(theme => ({
 
 export default function ConnectionSettings() {
   const classes = useStyles();
+  const snackbar = useRef();
 
-  const [txtPort, setTxtPort] = useState('COM3');
-  const [txtBaudRate, setTxtBaudRate] = useState('250000');
+  const [txtPort, setTxtPort] = useState('');
+  const [txtBaudRate, setTxtBaudRate] = useState('');
+  const [txtPortError, setTxtPortError] = useState({
+    error: false,
+    message: ''
+  });
+  const [txtBaudRateError, setTxtBaudRateError] = useState({
+    error: false,
+    message: ''
+  });
+  const [snackbarMessage, setSnackbarMessage] = useState({
+    type: 'info',
+    message: ''
+  });
+
+  useEffect(() => {
+
+    connectionService.getConnection().then((data) => {
+
+      if (checkResponse(data)) {
+        setTxtPort(data.port);
+        setTxtBaudRate(data.baudrate);
+      }
+
+    });
+
+  }, []);
 
   function handleTxtPortChange(e) {
     setTxtPort(e.target.value);
+    checkTxtPort(e.target.value);
   }
 
   function handleTxtBaudRateChange(e) {
     setTxtBaudRate(e.target.value);
+    checkTxtBaudRate(e.target.value);
   }
 
   function handleSubmit(e) {
     e.preventDefault();
+
+    let valid = true;
+
+    if (!checkTxtPort(txtPort)) {
+      valid = false;
+    }
+    if (!checkTxtBaudRate(txtBaudRate)) {
+      valid = false;
+    }
+    
+    if (valid) {
+      connectionService.setConnection({
+        port: txtPort,
+        baudrate: txtBaudRate
+      }).then((data) => {
+
+        const responseCheck = checkResponse(data);
+
+        if (responseCheck.valid) {
+          setSnackbarMessage({
+            type: 'success',
+            message: 'Connection details successfully set. The server will restart now.'
+          });
+
+          snackbar.current.handleOpen();
+
+          setTimeout(() => {
+            console.log('restarting...');
+            window.location.reload();
+          }, 2000);
+
+        } else {
+          setSnackbarMessage({
+            type: responseCheck.type,
+            message: responseCheck.message
+          });
+          snackbar.current.handleOpen();
+        }
+
+      });
+    }
+  }
+
+  function checkTxtPort(port) {
+    if (validator.isEmpty(port)) {
+      setTxtPortError({
+        error: true,
+        message: 'Please enter a port.'
+      });
+      return false;
+    } else {
+      resetTxtPortError();
+      return true;
+    }
+  }
+
+  function resetTxtPortError() {
+    setTxtPortError({
+      error: false,
+      message: ''
+    });
+  }
+
+  function checkTxtBaudRate(baudrate) {
+    if (validator.isEmpty(baudrate)) {
+      setTxtBaudRateError({
+        error: true,
+        message: 'Please enter a valid baudrate.'
+      });
+      return false;
+    } else if (!validator.isNumeric(baudrate)) {
+      setTxtBaudRateError({
+        error: true,
+        message: 'Baudrate must be a number.'
+      });
+      return false;
+    } else {
+      resetTxtBaudRateError();
+      return true;
+    }
+  }
+
+  function resetTxtBaudRateError() {
+    setTxtBaudRateError({
+      error: false,
+      message: ''
+    });
   }
 
   return (
@@ -102,6 +221,8 @@ export default function ConnectionSettings() {
                 variant="outlined" 
                 value={txtPort}
                 onChange={handleTxtPortChange}
+                error={txtPortError.error}
+                helperText={txtPortError.message}
 
               />
             </FormControl>
@@ -116,6 +237,8 @@ export default function ConnectionSettings() {
                 variant="outlined" 
                 value={txtBaudRate}
                 onChange={handleTxtBaudRateChange}
+                error={txtBaudRateError.error}
+                helperText={txtBaudRateError.message}
 
               />
             </FormControl>
@@ -135,6 +258,11 @@ export default function ConnectionSettings() {
             <Button className={classes.button} onClick={() => {window.history.back()}} >Back</Button>
           </div>
       </main>
+      <Snackbar 
+        message={snackbarMessage.message} 
+        variant={snackbarMessage.type}
+        ref={snackbar} 
+      />
     </Dashboard>
   );
 }
