@@ -18,8 +18,10 @@ import { Hidden } from '@material-ui/core';
 import Dashboard from '../components/dashboard.component';
 import Spinner from '../components/spinner.component';
 import Snackbar from '../components/snackbar.component';
+import DeleteDialog from '../components/deletedialog.component';
 import { userService } from '../services/users.service';
 import { AccountsContext } from '../contexts/accounts.context';
+import { checkResponse } from '../helpers/api.helper';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -95,12 +97,22 @@ export default function AccountSettings(props) {
     type: 'info',
     message: ''
   });
+  const [deleteItemName, setDeleteItemName] = useState('');
+  const [deleteItemId, setDeleteItemId] = useState(0);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
   const snackbar = useRef();
 
   useEffect(() => {
+    loadUsers();
+  }, []);
+
+  const loadUsers = () => {
     userService.getAll().then((data) => {
-      if (checkResponse(data)) {
+
+      const responseCheck = checkResponse(data);
+
+      if (responseCheck.valid) {
         setAccounts(data);
         
         if (accountsContext.new) {
@@ -113,25 +125,47 @@ export default function AccountSettings(props) {
           snackbar.current.handleOpen();
         }
 
+      } else {
+        setSnackbarMessage({
+          type: responseCheck.type,
+          message: responseCheck.message
+        });
+        snackbar.current.handleOpen();
       }
       setUserPromiseResolved(true);
     });
-  }, []);
+  }
 
-  const checkResponse = (data) => {
-    if (data.error === undefined) return true;
-    else {
-      
-      if (data.error.code === 'ER_INTERNAL') {
+  const handleDeleteClick = (row) => {
+    setDeleteItemId(row._id);
+    setDeleteItemName(row.username);
+    setOpenDeleteDialog(true);
+  }
+
+  const handleDeleteCancel = () => {
+    setOpenDeleteDialog(false);
+  }
+
+  const handleDeleteConfirm = () => {
+    setOpenDeleteDialog(false);
+
+    userService.remove(deleteItemId).then((data) => {
+
+      const responseCheck = checkResponse(data);
+
+      if (responseCheck.valid) {
+        console.log('success');
+        loadUsers();
+      } else {
         setSnackbarMessage({
-          type: 'error',
-          message: 'An internal error occured. Please try again in a few seconds.'
+          type: responseCheck.type,
+          message: responseCheck.message
         });
+        snackbar.current.handleOpen();
       }
 
-      snackbar.current.handleOpen();
+    });
 
-    }
   }
 
   return (
@@ -159,6 +193,7 @@ export default function AccountSettings(props) {
                 </TableRow>
               </TableHead>
               <TableBody>
+
                 {accounts.map(row => (
                   <TableRow className={classes.rowHover} key={row._id}>
                     <TableCell component="th" scope="row">
@@ -169,12 +204,13 @@ export default function AccountSettings(props) {
                       <TableCell>{row.lastname}</TableCell>
                     </Hidden>
                     <TableCell align="right">
-                      <IconButton onClick={(e) => props.onDeleteClick(e, row)} aria-label="Delete">
+                      <IconButton onClick={() => handleDeleteClick(row)} aria-label="Delete">
                         <DeleteIcon fontSize="small" />
                       </IconButton>
                     </TableCell>
                   </TableRow>
                 ))}
+
               </TableBody>
             </Table>
           </Paper>
@@ -192,11 +228,21 @@ export default function AccountSettings(props) {
           </Fab>
         </Link>
       </div>
+
+      <DeleteDialog 
+        open={openDeleteDialog} 
+        deleteItemName={deleteItemName}
+        deleteType="user"
+        onCancelDelete={handleDeleteCancel} 
+        onConfirmDelete={handleDeleteConfirm} 
+      />
+
       <Snackbar 
         message={snackbarMessage.message} 
         variant={snackbarMessage.type}
         ref={snackbar} 
       />
+
     </Dashboard>
   );
 }

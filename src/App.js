@@ -16,6 +16,7 @@ import LoadingWithIcon from './pages/loading.page';
 import { userService } from './services/users.service';
 
 import { UserContext } from './contexts/user.context';
+import PrinterSettings from './pages/printersettings.page';
 
 //create consistent theme styling for app
 const theme = createMuiTheme({
@@ -117,6 +118,10 @@ function App() {
 
                       <Route exact path="/settings/connection" render={ props => (
                         <ConnectionSettings />
+                      )} />
+
+                      <Route exact path="/settings/printer" render={ props => (
+                        <PrinterSettings />
                       )} />
 
                       <Route exact path="/settings/accounts" render={ props => (
