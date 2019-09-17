@@ -19,7 +19,9 @@ import { Hidden } from '@material-ui/core';
 import Dashboard from '../components/dashboard.component';
 import Snackbar from '../components/snackbar.component';
 import Spinner from '../components/spinner.component';
+import DeleteDialog from '../components/deletedialog.component';
 import { uploadService } from '../services/uploads.service';
+import { checkResponse } from '../helpers/api.helper';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -86,32 +88,60 @@ export default function Files(props) {
     type: 'info',
     message: ''
   });
+  const [deleteItemName, setDeleteItemName] = useState('');
+  const [deleteItemId, setDeleteItemId] = useState(0);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
   const snackbar = useRef();
 
   useEffect(() => {
+    loadFiles();
+  }, []);
+
+  const loadFiles = () => {
     uploadService.getAll().then((data) => {
-      if (checkResponse(data)) {
+      
+      const responseCheck = checkResponse(data);
+
+      if (responseCheck.valid) {
         setUploads(data);
       }
       setUploadPromiseResolved(true);
     });
-  }, [])
+  }
 
-  const checkResponse = (data) => {
-    if (data.error === undefined) return true;
-    else {
-      
-      if (data.error.code === 'ER_INTERNAL') {
+  const handleDeleteClick = (row) => {
+    setDeleteItemId(row._id);
+    setDeleteItemName(row.filename);
+    setOpenDeleteDialog(true);
+  }
+
+  const handleDeleteCancel = () => {
+    setOpenDeleteDialog(false);
+  }
+
+  const handleDeleteConfirm = () => {
+    setOpenDeleteDialog(false);
+
+    uploadService.remove(deleteItemId).then((data) => {
+
+      const responseCheck = checkResponse(data);
+
+      console.log(data);
+
+      if (responseCheck.valid) {
+        console.log('success');
+        loadFiles();
+      } else {
         setSnackbarMessage({
-          type: 'error',
-          message: 'An internal error occured. Please try again in a few seconds.'
+          type: responseCheck.type,
+          message: responseCheck.message
         });
+        snackbar.current.handleOpen();
       }
 
-      snackbar.current.handleOpen();
+    });
 
-    }
   }
 
   return (
@@ -155,7 +185,7 @@ export default function Files(props) {
                       <IconButton className={classes.button} aria-label="Download">
                         <SaveAltIcon fontSize="small" />
                       </IconButton>
-                      <IconButton className={classes.button} onClick={(e) => props.onDeleteClick(e, row)} aria-label="Delete">
+                      <IconButton className={classes.button} onClick={() => handleDeleteClick(row)} aria-label="Delete">
                         <DeleteIcon fontSize="small" />
                       </IconButton>
                     </TableCell>
@@ -175,11 +205,21 @@ export default function Files(props) {
           </Fab>
         </Link>
       </div>
+
+      <DeleteDialog 
+        open={openDeleteDialog} 
+        deleteItemName={deleteItemName}
+        deleteType="file"
+        onCancelDelete={handleDeleteCancel} 
+        onConfirmDelete={handleDeleteConfirm} 
+      />
+
       <Snackbar 
         message={snackbarMessage.message} 
         variant={snackbarMessage.type}
         ref={snackbar} 
       />
+
     </Dashboard>
   );
 }
