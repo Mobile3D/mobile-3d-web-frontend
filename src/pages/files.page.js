@@ -20,6 +20,7 @@ import Dashboard from '../components/dashboard.component';
 import Snackbar from '../components/snackbar.component';
 import Spinner from '../components/spinner.component';
 import DeleteDialog from '../components/deletedialog.component';
+import UploadDialog from '../components/uploaddialog.component';
 import { uploadService } from '../services/uploads.service';
 import { checkResponse } from '../helpers/api.helper';
 
@@ -91,6 +92,8 @@ export default function Files(props) {
   const [deleteItemName, setDeleteItemName] = useState('');
   const [deleteItemId, setDeleteItemId] = useState(0);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [openUploadDialog, setOpenUploadDialog] = useState(false);
+  const [filesToUpload, setFilesToUpload] = useState([]);
 
   const snackbar = useRef();
 
@@ -144,83 +147,106 @@ export default function Files(props) {
 
   }
 
+  const handleUploadDialogOpen = (e) => {
+    e.preventDefault();
+    setOpenUploadDialog(true);
+    console.log(e.dataTransfer.files);
+  }
+
+  const handleFileDrop = (e) => {
+    e.preventDefault();
+    console.log(e.dataTransfer.files[0]);
+  }
+
+  const handleUploadCancel = () => {
+    setOpenUploadDialog(false);
+  }
+
   return (
-    <Dashboard navTitle="Files">
-      <div className={classes.heroContent}>
-        <Typography component="h1" variant="h3" align="center" color="textPrimary" gutterBottom>
-          Files
-        </Typography>
-      </div>
-      <div className={classes.tableRoot}>
-
-        { uploadPromiseResolved && uploads.length === 0 ? (
-          <Typography component="h5" variant="h5" align="center" color="textPrimary" gutterBottom>
-            Upload some files to print them.
+    <div onDragOver={handleUploadDialogOpen} onDrop={handleFileDrop}>
+      <Dashboard navTitle="Files">
+        <div className={classes.heroContent}>
+          <Typography component="h1" variant="h3" align="center" color="textPrimary" gutterBottom>
+            Files
           </Typography>
-        ) : uploadPromiseResolved && uploads.length > 0 ? (
-          <Paper className={classes.table}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Name</TableCell>
-                  <Hidden xsDown={true}>
-                    <TableCell>Size</TableCell>
-                  </Hidden>
-                  <TableCell align="right">Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {uploads.map(row => (
-                  <TableRow className={classes.rowHover} key={row._id}>
-                    <TableCell component="th" scope="row">
-                      {row.filename}
-                    </TableCell>
+        </div>
+        <div className={classes.tableRoot}>
+
+          { uploadPromiseResolved && uploads.length === 0 ? (
+            <Typography component="h5" variant="h5" align="center" color="textPrimary" gutterBottom>
+              Upload some files to print them.
+            </Typography>
+          ) : uploadPromiseResolved && uploads.length > 0 ? (
+            <Paper className={classes.table}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Name</TableCell>
                     <Hidden xsDown={true}>
-                      <TableCell>{(row.size / 1000) + ' KB'}</TableCell>
+                      <TableCell>Size</TableCell>
                     </Hidden>
-                    <TableCell align="right">
-                      <IconButton className={classes.button} aria-label="Print">
-                        <PrintIcon fontSize="small" />
-                      </IconButton>
-                      <IconButton className={classes.button} aria-label="Download">
-                        <SaveAltIcon fontSize="small" />
-                      </IconButton>
-                      <IconButton className={classes.button} onClick={() => handleDeleteClick(row)} aria-label="Delete">
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    </TableCell>
+                    <TableCell align="right">Actions</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Paper>
-        ) : !uploadPromiseResolved ? (
-          <Spinner/>
-        ) : ''}
-        
-        <Link to="/upload" className={classes.link} >
-          <Fab variant="extended" size="large" color="primary" aria-label="Add" className={classes.fab}>
-            <AddIcon />
-            Upload File
-          </Fab>
-        </Link>
-      </div>
+                </TableHead>
+                <TableBody>
+                  {uploads.map(row => (
+                    <TableRow className={classes.rowHover} key={row._id}>
+                      <TableCell component="th" scope="row">
+                        {row.filename}
+                      </TableCell>
+                      <Hidden xsDown={true}>
+                        <TableCell>{(row.size / 1000) + ' KB'}</TableCell>
+                      </Hidden>
+                      <TableCell align="right">
+                        <IconButton className={classes.button} aria-label="Print">
+                          <PrintIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton className={classes.button} aria-label="Download">
+                          <SaveAltIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton className={classes.button} onClick={() => handleDeleteClick(row)} aria-label="Delete">
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Paper>
+          ) : !uploadPromiseResolved ? (
+            <Spinner/>
+          ) : ''}
+          
+          <Link to="/upload" className={classes.link} >
+            <Fab variant="extended" size="large" color="primary" aria-label="Add" className={classes.fab}>
+              <AddIcon />
+              Upload File
+            </Fab>
+          </Link>
+        </div>
 
-      <DeleteDialog 
-        open={openDeleteDialog} 
-        deleteItemName={deleteItemName}
-        deleteType="file"
-        onCancelDelete={handleDeleteCancel} 
-        onConfirmDelete={handleDeleteConfirm} 
-      />
+        <DeleteDialog 
+          open={openDeleteDialog} 
+          deleteItemName={deleteItemName}
+          deleteType="file"
+          onCancelDelete={handleDeleteCancel} 
+          onConfirmDelete={handleDeleteConfirm} 
+        />
 
-      <Snackbar 
-        message={snackbarMessage.message} 
-        variant={snackbarMessage.type}
-        ref={snackbar} 
-      />
+        <UploadDialog
+          open={openUploadDialog}
+          onCancel={handleUploadCancel}
+          uploadFiles={filesToUpload}
+        />
 
-    </Dashboard>
+        <Snackbar 
+          message={snackbarMessage.message} 
+          variant={snackbarMessage.type}
+          ref={snackbar} 
+        />
+
+      </Dashboard>
+    </div>
   );
 }
 
