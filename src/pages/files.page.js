@@ -92,10 +92,10 @@ export default function Files(props) {
   const [deleteItemName, setDeleteItemName] = useState('');
   const [deleteItemId, setDeleteItemId] = useState(0);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const [openUploadDialog, setOpenUploadDialog] = useState(false);
   const [filesToUpload, setFilesToUpload] = useState([]);
 
   const snackbar = useRef();
+  const uploadDialog = useRef();
 
   useEffect(() => {
     loadFiles();
@@ -149,21 +149,11 @@ export default function Files(props) {
 
   const handleUploadDialogOpen = (e) => {
     e.preventDefault();
-    setOpenUploadDialog(true);
-    console.log(e.dataTransfer.files);
-  }
-
-  const handleFileDrop = (e) => {
-    e.preventDefault();
-    console.log(e.dataTransfer.files[0]);
-  }
-
-  const handleUploadCancel = () => {
-    setOpenUploadDialog(false);
+    uploadDialog.current.handleOpen();
   }
 
   return (
-    <div onDragOver={handleUploadDialogOpen} onDrop={handleFileDrop}>
+    <div onDragOver={handleUploadDialogOpen}>
       <Dashboard navTitle="Files">
         <div className={classes.heroContent}>
           <Typography component="h1" variant="h3" align="center" color="textPrimary" gutterBottom>
@@ -234,9 +224,7 @@ export default function Files(props) {
         />
 
         <UploadDialog
-          open={openUploadDialog}
-          onCancel={handleUploadCancel}
-          uploadFiles={filesToUpload}
+          ref={uploadDialog}
         />
 
         <Snackbar 

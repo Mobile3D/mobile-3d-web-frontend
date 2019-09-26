@@ -10,7 +10,10 @@ export const uploadService = {
 async function add(body) {
   return fetch(apiHelper.getUrl() + '/uploads', {
     method: 'POST',
-    headers: apiHelper.getHeaders(),
+    headers: {
+      'Content-Type': 'multipart/form-data',
+      'Authorization': 'Bearer ' + window.localStorage.getItem('token'),
+    },
     body: JSON.stringify(body)
   })
   .then(res => res.json());
