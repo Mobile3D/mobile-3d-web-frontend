@@ -52,6 +52,10 @@ const UploadDialog = forwardRef((props, ref) => {
 
     handleOpen() {
       setOpen(true);
+    },
+
+    setUpload(upload) {
+      setFile(upload);
     }
 
   }));
@@ -74,9 +78,10 @@ const UploadDialog = forwardRef((props, ref) => {
 
     if (file !== null) {
 
-      uploadService.add({
-        file: file
-      })
+      let body = new FormData();
+      body.append('file', file);
+
+      uploadService.add(body)
       .then((data) => {
         console.log(data);
       });

@@ -13,7 +13,6 @@ import SaveAltIcon from '@material-ui/icons/SaveAlt';
 import Fab from '@material-ui/core/Fab';
 import AddIcon from '@material-ui/icons/Add';
 import { makeStyles } from '@material-ui/core/styles';
-import { Link } from 'react-router-dom';
 import { Hidden } from '@material-ui/core';
 
 import Dashboard from '../components/dashboard.component';
@@ -78,6 +77,9 @@ const useStyles = makeStyles(theme => ({
       color: '#0078d7',
     },
   },
+  inputFile: {
+    display: 'none',
+  },
 }));
 
 export default function Files(props) {
@@ -92,10 +94,10 @@ export default function Files(props) {
   const [deleteItemName, setDeleteItemName] = useState('');
   const [deleteItemId, setDeleteItemId] = useState(0);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const [filesToUpload, setFilesToUpload] = useState([]);
 
   const snackbar = useRef();
   const uploadDialog = useRef();
+  const uploadField = useRef();
 
   useEffect(() => {
     loadFiles();
@@ -149,6 +151,15 @@ export default function Files(props) {
 
   const handleUploadDialogOpen = (e) => {
     e.preventDefault();
+    uploadDialog.current.handleOpen();
+  }
+
+  const handleUploadFileClick = (e) => {
+    uploadField.current.click();
+  }
+
+  const handleFleUploadChange = (e) => {
+    uploadDialog.current.setUpload(e.target.files[0]);
     uploadDialog.current.handleOpen();
   }
 
@@ -207,12 +218,19 @@ export default function Files(props) {
             <Spinner/>
           ) : ''}
           
-          <Link to="/upload" className={classes.link} >
-            <Fab variant="extended" size="large" color="primary" aria-label="Add" className={classes.fab}>
-              <AddIcon />
-              Upload File
-            </Fab>
-          </Link>
+          <input
+            className={classes.inputFile}
+            id="fleUpload"
+            name="fleUpload"
+            onChange={ handleFleUploadChange }
+            type="file"
+            ref={uploadField}
+          />
+
+          <Fab variant="extended" size="large" color="primary" aria-label="Add" className={classes.fab} onClick={handleUploadFileClick}>
+            <AddIcon />
+            Upload File
+          </Fab>
         </div>
 
         <DeleteDialog 

@@ -14,7 +14,7 @@ async function add(body) {
       'Content-Type': 'multipart/form-data',
       'Authorization': 'Bearer ' + window.localStorage.getItem('token'),
     },
-    body: JSON.stringify(body)
+    body: body
   })
   .then(res => res.json());
 }
