@@ -193,7 +193,7 @@ export default function Files(props) {
                   {uploads.map(row => (
                     <TableRow className={classes.rowHover} key={row._id}>
                       <TableCell component="th" scope="row">
-                        {row.filename}
+                        {row.originalname}
                       </TableCell>
                       <Hidden xsDown={true}>
                         <TableCell>{(row.size / 1000) + ' KB'}</TableCell>
@@ -243,6 +243,7 @@ export default function Files(props) {
 
         <UploadDialog
           ref={uploadDialog}
+          onUploadSuccess={loadFiles}
         />
 
         <Snackbar 

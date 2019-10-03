@@ -2,6 +2,7 @@ export const apiHelper = {
   getUrl,
   getDefaultHeaders,
   getHeaders,
+  getFileUploadHeaders,
   checkToken,
   checkAuth
 };
@@ -19,6 +20,12 @@ function getDefaultHeaders() {
 function getHeaders() {
   return {
     'Content-Type': 'application/json',
+    'Authorization': 'Bearer ' + window.localStorage.getItem('token'),
+  }
+}
+
+function getFileUploadHeaders() {
+  return {
     'Authorization': 'Bearer ' + window.localStorage.getItem('token'),
   }
 }

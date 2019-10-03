@@ -60,7 +60,7 @@ const UploadDialog = forwardRef((props, ref) => {
 
   }));
 
-  const onCancel = () => {
+  const handleClose = () => {
     setFile(null);
     setOpen(false);
   }
@@ -83,7 +83,8 @@ const UploadDialog = forwardRef((props, ref) => {
 
       uploadService.add(body)
       .then((data) => {
-        console.log(data);
+        props.onUploadSuccess();
+        handleClose();
       });
 
     }
@@ -92,10 +93,10 @@ const UploadDialog = forwardRef((props, ref) => {
 
   return (
     <div onDrop={handleFileDrop}>
-      <Dialog fullScreen open={open} onClose={onCancel} TransitionComponent={Transition}>
+      <Dialog fullScreen open={open} onClose={handleClose} TransitionComponent={Transition}>
         <AppBar className={classes.appBar}>
           <Toolbar>
-            <IconButton edge="start" color="inherit" onClick={onCancel} aria-label="close">
+            <IconButton edge="start" color="inherit" onClick={handleClose} aria-label="close">
               <CloseIcon />
             </IconButton>
             <Typography variant="h6" className={classes.title}>
