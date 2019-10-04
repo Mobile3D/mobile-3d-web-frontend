@@ -66,11 +66,6 @@ export default function Status() {
             </Typography>
             <ButtonGroup className={classes.buttonGroup} color="primary" aria-label="outlined primary button group">
               <Button>
-                <Link to="/upload" className={classes.link} >
-                  Upload
-                </Link>
-              </Button>
-              <Button>
                 <Link to="/files" className={classes.link} >
                   Choose From Files
                 </Link>

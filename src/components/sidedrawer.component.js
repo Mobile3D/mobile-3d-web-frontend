@@ -11,7 +11,6 @@ import Avatar from '@material-ui/core/Avatar';
 import deepOrange from '@material-ui/core/colors/deepOrange';
 import pink from '@material-ui/core/colors/pink';
 import HomeIcon from '@material-ui/icons/Home';
-import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import FolderIcon from '@material-ui/icons/Folder';
 import ControlCameraIcon from '@material-ui/icons/ControlCamera';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
@@ -84,12 +83,6 @@ export default function SideDrawer(props) {
                   <ListItem button selected={ props.selectedPage === 'controls' }>
                     <ListItemIcon><ControlCameraIcon /></ListItemIcon>
                     <ListItemText primary="Controls" />
-                  </ListItem>
-                </Link>
-                <Link to="/upload" className={classes.link} >
-                  <ListItem button selected={ props.selectedPage === 'upload' }>
-                    <ListItemIcon><CloudUploadIcon /></ListItemIcon>
-                    <ListItemText primary="Upload" />
                   </ListItem>
                 </Link>
                 <Link to="/files" className={classes.link} >

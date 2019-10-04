@@ -17,6 +17,7 @@ import LinearProgress from '@material-ui/core/LinearProgress';
 
 import { uploadService } from '../services/uploads.service';
 import { checkResponse } from '../helpers/api.helper';
+import { checkFile } from '../helpers/upload.helper';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -58,7 +59,15 @@ const UploadDialog = forwardRef((props, ref) => {
     },
 
     setUpload(upload) {
-      setFile(upload);
+      if (checkFile(upload)) {
+        setFile(upload);
+      } else {
+        handleClose();
+        props.onBeforeUploadError({
+          type: 'error',
+          message: 'Files of this type cannot be uploaded. Please upload a GCODE file.'
+        });
+      }
     }
 
   }));
@@ -71,8 +80,14 @@ const UploadDialog = forwardRef((props, ref) => {
   const handleFileDrop = (e) => {
     e.preventDefault();
 
-    if (e.dataTransfer.files[0].size % 4096 !== 0 && e.dataTransfer.files[0].size !== 0) {
+    if (checkFile(e.dataTransfer.files[0])) {
       setFile(e.dataTransfer.files[0]);
+    } else {
+      handleClose();
+      props.onBeforeUploadError({
+        type: 'error',
+        message: 'Files of this type cannot be uploaded. Please upload a GCODE file.'
+      });
     }
 
   }
@@ -90,12 +105,19 @@ const UploadDialog = forwardRef((props, ref) => {
 
         const responseCheck = checkResponse(data);
 
-        props.onUploadFinish();
-        setUploadStarted(false);
-
-        if (!responseCheck.valid) {
-          
+        if (responseCheck.valid) {
+          props.onUploadFinish({
+            type: 'success',
+            message: 'File "' + data.originalname + '" successfully uploaded.'
+          });
+        } else {
+          props.onUploadFinish({
+            type: 'error',
+            message: 'Files of this type cannot be uploaded.'
+          });
         }
+
+        setUploadStarted(false);
 
         handleClose();
 
@@ -116,7 +138,7 @@ const UploadDialog = forwardRef((props, ref) => {
             <Typography variant="h6" className={classes.title}>
               Upload Files
             </Typography>
-            <Button color="inherit" onClick={handleUploadButtonClick}>
+            <Button color="inherit" onClick={handleUploadButtonClick} disabled={uploadStarted}>
               UPLOAD
             </Button>
           </Toolbar>
@@ -137,7 +159,7 @@ const UploadDialog = forwardRef((props, ref) => {
               <InsertDriveFileIcon className={classes.icon} />
             </Typography>
             <Typography component="h5" variant="h5" align="center" color="textSecondary" gutterBottom>
-              Drop your file here
+              Drop your GCODE file here
             </Typography>
           </div>
 

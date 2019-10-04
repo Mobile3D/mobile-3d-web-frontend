@@ -104,10 +104,6 @@ function App() {
                         <Controls />
                       )} />
 
-                      <Route exact path="/upload" render={ props => (
-                        <Upload />
-                      )} />
-
                       <Route exact path="/files" render={ props => (
                         <Files />
                       )} />

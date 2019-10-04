@@ -160,8 +160,31 @@ export default function Files(props) {
   }
 
   const handleFleUploadChange = (e) => {
-    uploadDialog.current.setUpload(e.target.files[0]);
-    uploadDialog.current.handleOpen();
+    if (e.target.files[0] !== undefined) {
+      uploadDialog.current.handleOpen();
+      uploadDialog.current.setUpload(e.target.files[0]);
+    }
+  }
+
+  const handleUploadFinish = (res) => {
+    
+    if (res.type !== 'success') {
+      setSnackbarMessage({
+        type: res.type,
+        message: res.message
+      }); 
+      snackbar.current.handleOpen();
+    }
+
+    loadFiles();
+  }
+
+  const handleBeforeUploadError = (res) => {
+    setSnackbarMessage({
+      type: res.type,
+      message: res.message
+    });
+    snackbar.current.handleOpen();
   }
 
   return (
@@ -245,7 +268,8 @@ export default function Files(props) {
 
           <UploadDialog
             ref={uploadDialog}
-            onUploadFinish={loadFiles}
+            onUploadFinish={handleUploadFinish}
+            onBeforeUploadError={handleBeforeUploadError}
           />
 
           <Snackbar 

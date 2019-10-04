@@ -100,7 +100,7 @@ const CustomizedSnackbar = forwardRef((props, ref) => {
       <Snackbar
         anchorOrigin={{
           vertical: 'bottom',
-          horizontal: 'right',
+          horizontal: 'left',
         }}
         open={open}
         autoHideDuration={6000}
