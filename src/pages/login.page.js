@@ -55,6 +55,7 @@ export default function Login() {
 
   const [txtUsername, setTxtUsername] = useState('');
   const [txtPassword, setTxtPassword] = useState('');
+  const [chkRememberMe, setChkRememberMe] = useState(false);
   const [txtUsernameError, setTxtUsernameError] = useState({
     error: false,
     message: ''
@@ -78,6 +79,10 @@ export default function Login() {
   function handleTxtPasswordChange(e) {
     setTxtPassword(e.target.value);
     checkTxtPassword(e.target.value);
+  }
+
+  function handleChkRememberMeChange(e) {
+    setChkRememberMe(e.target.value);
   }
 
   function handleSubmit(e) {
@@ -206,7 +211,7 @@ export default function Login() {
                 helperText={txtPasswordError.message}
               />
               <FormControlLabel
-                control={<Checkbox value="remember" color="primary" />}
+                control={<Checkbox color="primary" onChange={handleChkRememberMeChange} value={chkRememberMe} />}
                 label="Remember me"
               />
               <Button
