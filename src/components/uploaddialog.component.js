@@ -13,8 +13,10 @@ import Typography from '@material-ui/core/Typography';
 import CloseIcon from '@material-ui/icons/Close';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import Slide from '@material-ui/core/Slide';
+import LinearProgress from '@material-ui/core/LinearProgress';
 
 import { uploadService } from '../services/uploads.service';
+import { checkResponse } from '../helpers/api.helper';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -47,6 +49,7 @@ const UploadDialog = forwardRef((props, ref) => {
 
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState(null);
+  const [uploadStarted, setUploadStarted] = useState(false);
 
   useImperativeHandle(ref, () => ({
 
@@ -80,11 +83,22 @@ const UploadDialog = forwardRef((props, ref) => {
 
       let body = new FormData();
       body.append('file', file);
+      setUploadStarted(true);
 
       uploadService.add(body)
       .then((data) => {
-        props.onUploadSuccess();
+
+        const responseCheck = checkResponse(data);
+
+        props.onUploadFinish();
+        setUploadStarted(false);
+
+        if (!responseCheck.valid) {
+          
+        }
+
         handleClose();
+
       });
 
     }
@@ -113,7 +127,7 @@ const UploadDialog = forwardRef((props, ref) => {
             <ListItem button>
               <ListItemText primary={file.name} secondary={file.size / 1000 + ' KB'} />
             </ListItem>
-            <Divider />
+            { uploadStarted ? (<LinearProgress className={classes.linearProgress} />) : (<Divider />) }
           </List>
 
         ) : (

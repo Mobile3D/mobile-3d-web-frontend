@@ -8,7 +8,7 @@ export const apiHelper = {
 };
 
 function getUrl() {
-  return 'http://192.168.103.92:4000/api/v1';
+  return 'http://' + window.location.host.split(':')[0] + ':4000/api/v1';
 }
 
 function getDefaultHeaders() {
@@ -47,11 +47,11 @@ export function checkResponse(data) {
   if (data.error === undefined) return { valid: true };
   else {
 
-    if (data.error.code === 'ER_INVALID_LOGIN') {
+    if (data.error.code === 'ER_MISSING_PARAMS') {
       return {
         valid: false,
         type: 'error',
-        message: 'Your username or password is invalid.'
+        message: 'Some parameters are missing.'
       };
     } else if (data.error.code === 'ER_USERNAME_TAKEN') {
       return {
@@ -59,17 +59,41 @@ export function checkResponse(data) {
         type: 'error',
         message: 'The username you entered is already taken.'
       };
-    } else if (data.error.code === 'ER_MISSING_PARAMS') {
+    } else if (data.error.code === 'ER_USER_NOT_FOUND') {
       return {
         valid: false,
         type: 'error',
-        message: 'Some parameters are missing.'
+        message: 'The requested user could not be found.'
       };
-    } else if (data.error.code === 'ER_INTERNAL') {
+    } else if (data.error.code === 'ER_INVALID_LOGIN') {
       return {
         valid: false,
         type: 'error',
-        message: 'An internal error occured. Please try again in a few seconds.'
+        message: 'Your username or password is invalid.'
+      };
+    } else if (data.error.code === 'ER_UNAUTHORIZED') {
+      return {
+        valid: false,
+        type: 'error',
+        message: 'You need to be signed in to use this service.'
+      };
+    } else if (data.error.code === 'ER_TOKEN_EXPIRED') {
+      return {
+        valid: false,
+        type: 'error',
+        message: 'This session expired. Please reload the page and sign in again.'
+      };
+    } else if (data.error.code === 'ER_UPLOAD_NOT_FOUND') {
+      return {
+        valid: false,
+        type: 'error',
+        message: 'The requested upload could not be found. Please try to reload the page.'
+      };
+    } else if (data.error.code === 'ER_USER_TO_DELETE_SIGNED_IN') {
+      return {
+        valid: false,
+        type: 'error',
+        message: 'You cannot delete yourself.'
       };
     } else if (data.error.code === 'ER_TOO_MANY_REQUESTS') {
       return {
@@ -77,11 +101,17 @@ export function checkResponse(data) {
         type: 'error',
         message: 'Too many requests. Please wait a few seconds and try again.'
       };
+    } else if (data.error.code === 'ER_INTERNAL') {
+      return {
+        valid: false,
+        type: 'error',
+        message: 'An internal error occured. Please try again in a few seconds.'
+      };
     } else {
       return {
         valid: false,
         type: 'error',
-        message: 'An unknown error occured.'
+        message: 'An unknown error occured. Please try to reload the page.'
       };
     }
   }

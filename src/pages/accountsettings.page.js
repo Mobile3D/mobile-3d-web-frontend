@@ -154,7 +154,6 @@ export default function AccountSettings(props) {
       const responseCheck = checkResponse(data);
 
       if (responseCheck.valid) {
-        console.log('success');
         loadUsers();
       } else {
         setSnackbarMessage({

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import Dashboard from '../components/dashboard.component';
 import ActionCard from '../components/actioncard.component';
 import Status from '../components/status.component';
+import UploadDialog from '../components/uploaddialog.component';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -34,10 +35,30 @@ const useStyles = makeStyles(theme => ({
       color: '#0078d7',
     },
   },
+  inputFile: {
+    display: 'none',
+  },
 }));
 
 export default function Home(props) {
   const classes = useStyles();
+
+  const handleUploadDialogOpen = (e) => {
+    e.preventDefault();
+    uploadDialog.current.handleOpen();
+  }
+
+  const handleUploadFileClick = (e) => {
+    uploadField.current.click();
+  }
+
+  const handleFleUploadChange = (e) => {
+    uploadDialog.current.setUpload(e.target.files[0]);
+    uploadDialog.current.handleOpen();
+  }
+
+  const uploadDialog = useRef();
+  const uploadField = useRef();
 
   return (
     <Dashboard navTitle="Home">
@@ -67,9 +88,7 @@ export default function Home(props) {
               </Link>
             </Grid>
             <Grid item>
-              <Link to="/upload" className={classes.link} >
-                <ActionCard action="upload" title="Upload" description="Add files to the printing list" />
-              </Link>
+              <ActionCard action="upload" title="Upload" description="Add files to the printing list"  onClick={handleUploadFileClick} />
             </Grid>
             <Grid item>
               <Link to="/files" className={classes.link} >
@@ -79,6 +98,20 @@ export default function Home(props) {
           </Grid>
         </Grid>
       </Grid>
+
+      <input
+        className={classes.inputFile}
+        id="fleUpload"
+        name="fleUpload"
+        onChange={ handleFleUploadChange }
+        type="file"
+        ref={uploadField}
+      />
+
+      <UploadDialog
+        ref={uploadDialog}
+      />
+
     </Dashboard>
   );
 }
