@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Card from '@material-ui/core/Card';
@@ -44,6 +44,8 @@ const useStyles = makeStyles(theme => ({
 export default function Status() {
   const classes = useStyles();
 
+  const [loadedFile, setLoadedFile] = useState({ id: window.sessionStorage.getItem('print_file_id'), name: window.sessionStorage.getItem('print_file_name')});
+
   return (
     <div className={classes.root}>
       <Card className={classes.card}>
@@ -61,16 +63,18 @@ export default function Status() {
             <Typography component="span" variant="subtitle1" color="primary">
               Ready
             </Typography>
-            <Typography variant="subtitle1" color="error">
-              No file loaded
+            <Typography variant="subtitle1" color={loadedFile.id !== null ? 'initial' : 'error'}>
+              { loadedFile.id !== null ? loadedFile.name : 'No file loaded' }
             </Typography>
-            <ButtonGroup className={classes.buttonGroup} color="primary" aria-label="outlined primary button group">
-              <Button>
-                <Link to="/files" className={classes.link} >
-                  Choose From Files
-                </Link>
-              </Button>
-            </ButtonGroup>
+            { loadedFile.id !== null ? (<div></div>): (
+              <ButtonGroup className={classes.buttonGroup} color="primary" aria-label="outlined primary button group">
+                <Button>
+                  <Link to="/files" className={classes.link} >
+                    Choose From Files
+                  </Link>
+                </Button>
+              </ButtonGroup>
+            )}
           </CardContent>
           <div className={classes.controls}>
             <IconButton aria-label="pause" disabled>

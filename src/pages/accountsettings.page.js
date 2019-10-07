@@ -51,12 +51,6 @@ const useStyles = makeStyles(theme => ({
       marginRight: theme.spacing(20),
     },
   },
-  rowHover: {
-    '&:hover': {
-      backgroundColor: theme.palette.grey[200],
-      /*cursor: 'pointer',*/
-    },
-  },
   fab: {
     margin: 0,
     top: 'auto',
@@ -194,7 +188,7 @@ export default function AccountSettings(props) {
               <TableBody>
 
                 {accounts.map(row => (
-                  <TableRow className={classes.rowHover} key={row._id}>
+                  <TableRow key={row._id}>
                     <TableCell component="th" scope="row">
                       {row.username}
                     </TableCell>

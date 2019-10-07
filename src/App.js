@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+import CssBaseline from '@material-ui/core/CssBaseline';
 
 import Login from './pages/login.page';
 import Home from './pages/home.page';
@@ -9,13 +10,12 @@ import AccountSettings from './pages/accountsettings.page';
 import ConnectionSettings from './pages/connectionsettings.page';
 import AddAccount from './pages/addaccount.page';
 import Files from './pages/files.page';
-import Upload from './pages/upload.page';
 import Controls from './pages/controls.page';
 import LoadingWithIcon from './pages/loading.page';
 
 import { userService } from './services/users.service';
-
 import { UserContext } from './contexts/user.context';
+import { SocketContext } from './contexts/socket.context';
 import PrinterSettings from './pages/printersettings.page';
 
 //create consistent theme styling for app
@@ -27,6 +27,7 @@ const theme = createMuiTheme({
       secondary: {
           main: '#9c27b0',
       },
+      type: 'light'
   },
   typography: {
       useNextVariants: true,
@@ -89,48 +90,55 @@ function App() {
       <UserContext.Provider value={user}>
         <Router>
           <div>
+            <CssBaseline />
 
             { authorized ? (
               <div>  
-                <UserContext.Consumer>
-                  {user => (
-                    <div>
+                <SocketContext.Consumer>
+                  { socket => (
+                    
+                    <UserContext.Consumer>
+                      {user => (
+                        <div>
 
-                      <Route exact path="/" render={ props => (                        
-                        <Home user={user} />        
-                      )} />
+                          <Route exact path="/" render={ props => (                        
+                            <Home user={user} socket={socket} />        
+                          )} />
 
-                      <Route exact path="/controls" render={ props => (
-                        <Controls />
-                      )} />
+                          <Route exact path="/controls" render={ props => (
+                            <Controls />
+                          )} />
 
-                      <Route exact path="/files" render={ props => (
-                        <Files />
-                      )} />
+                          <Route exact path="/files" render={ props => (
+                            <Files />
+                          )} />
 
-                      <Route exact path="/settings" render={ props => (
-                        <Settings />
-                      )} />
+                          <Route exact path="/settings" render={ props => (
+                            <Settings />
+                          )} />
 
-                      <Route exact path="/settings/connection" render={ props => (
-                        <ConnectionSettings />
-                      )} />
+                          <Route exact path="/settings/connection" render={ props => (
+                            <ConnectionSettings />
+                          )} />
 
-                      <Route exact path="/settings/printer" render={ props => (
-                        <PrinterSettings />
-                      )} />
+                          <Route exact path="/settings/printer" render={ props => (
+                            <PrinterSettings />
+                          )} />
 
-                      <Route exact path="/settings/accounts" render={ props => (
-                        <AccountSettings {...props} />
-                      )} />
+                          <Route exact path="/settings/accounts" render={ props => (
+                            <AccountSettings {...props} />
+                          )} />
 
-                      <Route exact path="/settings/accounts/add" render={ props => (
-                        <AddAccount {...props} />
-                      )} />
+                          <Route exact path="/settings/accounts/add" render={ props => (
+                            <AddAccount {...props} />
+                          )} />
 
-                    </div> 
+                        </div> 
+                      )}
+                    </UserContext.Consumer>
+
                   )}
-                </UserContext.Consumer>
+                </SocketContext.Consumer>
 
               </div>
             ) : (<RedirectToLogin />)

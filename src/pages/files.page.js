@@ -55,12 +55,6 @@ const useStyles = makeStyles(theme => ({
       marginRight: theme.spacing(20),
     },
   },
-  rowHover: {
-    '&:hover': {
-      backgroundColor: theme.palette.grey[200],
-      /*cursor: 'pointer',*/
-    },
-  },
   fab: {
     margin: 0,
     top: 'auto',
@@ -187,6 +181,16 @@ export default function Files(props) {
     snackbar.current.handleOpen();
   }
 
+  const handlePrintIconClick = (id, name) => {
+    window.sessionStorage.setItem('print_file_id', id);
+    window.sessionStorage.setItem('print_file_name', name);
+    setSnackbarMessage({
+      type: 'info',
+      message: '"' + name + '" will be printed next. Click the Start-Button on the homescreen to start printing.'
+    });
+    snackbar.current.handleOpen();
+  }
+
   return (
     <div onDragOver={handleUploadDialogOpen}>
       <div className={classes.fullscreen} >
@@ -216,7 +220,7 @@ export default function Files(props) {
                   </TableHead>
                   <TableBody>
                     {uploads.map(row => (
-                      <TableRow className={classes.rowHover} key={row._id}>
+                      <TableRow key={row._id}>
                         <TableCell component="th" scope="row">
                           {row.originalname}
                         </TableCell>
@@ -224,7 +228,7 @@ export default function Files(props) {
                           <TableCell>{(row.size / 1000) + ' KB'}</TableCell>
                         </Hidden>
                         <TableCell align="right">
-                          <IconButton className={classes.button} aria-label="Print">
+                          <IconButton className={classes.button} aria-label="Print" onClick={() => handlePrintIconClick(row._id, row.originalname)}>
                             <PrintIcon fontSize="small" />
                           </IconButton>
                           <IconButton className={classes.button} aria-label="Download">

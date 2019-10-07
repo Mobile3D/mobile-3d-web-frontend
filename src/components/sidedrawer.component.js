@@ -34,12 +34,12 @@ const useStyles = makeStyles(theme => ({
   },
   link: {
     textDecoration: 'none',
-    color: 'black',
+    color: theme.palette.text.primary,
     '&:focus': {
-      color: '#0078d7',
+      color: theme.palette.text.primary,
     },
     '&:active': {
-      color: '#0078d7',
+      color: theme.palette.text.primary,
     },
   },
 }));
