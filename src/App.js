@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -16,10 +16,11 @@ import LoadingWithIcon from './pages/loading.page';
 import { userService } from './services/users.service';
 import { UserContext } from './contexts/user.context';
 import { SocketContext } from './contexts/socket.context';
+import { ThemeContext } from './contexts/theme.context';
 import PrinterSettings from './pages/printersettings.page';
 
 //create consistent theme styling for app
-const theme = createMuiTheme({
+const theme_light = createMuiTheme({
   palette: {
       primary:  {
           main: '#0078d7',
@@ -28,6 +29,21 @@ const theme = createMuiTheme({
           main: '#9c27b0',
       },
       type: 'light'
+  },
+  typography: {
+      useNextVariants: true,
+  },
+});
+
+const theme_dark = createMuiTheme({
+  palette: {
+      primary:  {
+          main: '#0078d7',
+      },
+      secondary: {
+          main: '#9c27b0',
+      },
+      type: 'dark'
   },
   typography: {
       useNextVariants: true,
@@ -45,6 +61,8 @@ function App() {
   const [authorized, setAuthorized] = useState(window.localStorage.getItem('token') !== null ? true : false);
   const [userPromiseResolved, setUserPromiseResolved] = useState(false);
   const [user, setUser] = useState({});
+
+  const themeStyle = useContext(ThemeContext);
 
   useEffect(() => {
     if (window.localStorage.getItem('token') !== null) {
@@ -78,7 +96,8 @@ function App() {
   // if data has not been fetched yet
   if (!userPromiseResolved) {
     return (
-      <MuiThemeProvider theme={theme}>
+      <MuiThemeProvider theme={themeStyle.mode !== 'dark' ? theme_light : theme_dark}>
+        <CssBaseline />
         <LoadingWithIcon />
       </MuiThemeProvider>
     );
@@ -86,7 +105,7 @@ function App() {
 
   // otherwise
   return (
-    <MuiThemeProvider theme={theme}>
+    <MuiThemeProvider theme={themeStyle.mode !== 'dark' ? theme_light : theme_dark}>
       <UserContext.Provider value={user}>
         <Router>
           <div>

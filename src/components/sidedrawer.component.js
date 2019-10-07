@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
 import List from '@material-ui/core/List';
@@ -16,7 +16,9 @@ import ControlCameraIcon from '@material-ui/icons/ControlCamera';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 import SettingsIcon from '@material-ui/icons/Settings';
 import { Link } from 'react-router-dom';
+
 import { UserContext } from '../contexts/user.context';
+import { ThemeContext } from '../contexts/theme.context';
 
 const useStyles = makeStyles(theme => ({
   list: {
@@ -47,9 +49,19 @@ const useStyles = makeStyles(theme => ({
 export default function SideDrawer(props) {
   const classes = useStyles();
 
-  function handleLogout() {
+  const themeStyle = useContext(ThemeContext);
+
+  const handleLogout = () => {
     localStorage.removeItem('token');
     window.location.reload();
+  }
+
+  const handleDarkModeClick = () => {
+    if (themeStyle.mode === 'light') {
+      themeStyle.mode = 'dark';
+    } else {
+      themeStyle.mode = 'light';
+    }
   }
 
   return (
@@ -100,6 +112,10 @@ export default function SideDrawer(props) {
                     <ListItemText primary="Settings" />
                   </ListItem>
                 </Link>
+                <ListItem button onClick={handleDarkModeClick}>
+                  <ListItemIcon><SettingsIcon /></ListItemIcon>
+                  <ListItemText primary="Dark Mode" />
+                </ListItem>
                 <ListItem button onClick={handleLogout}>
                   <ListItemIcon><PowerSettingsNewIcon /></ListItemIcon>
                   <ListItemText primary="Logout" />
