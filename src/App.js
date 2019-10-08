@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Redirect } from 'react-router-dom';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -14,7 +14,9 @@ import Controls from './pages/controls.page';
 import LoadingWithIcon from './pages/loading.page';
 
 import { userService } from './services/users.service';
+import { printerService } from './services/printer.service';
 import { UserContext } from './contexts/user.context';
+import { PrinterContext } from './contexts/printer.context';
 import { SocketContext } from './contexts/socket.context';
 import { ThemeContext } from './contexts/theme.context';
 import PrinterSettings from './pages/printersettings.page';
@@ -61,11 +63,19 @@ function App() {
   const [authorized, setAuthorized] = useState(window.localStorage.getItem('token') !== null ? true : false);
   const [userPromiseResolved, setUserPromiseResolved] = useState(false);
   const [user, setUser] = useState({});
-
-  const themeStyle = useContext(ThemeContext);
+  const [printerStatus, setPrinterStatus] = useState({});
+  const [printerStatusPromiseResolved, setPrinterStatusPromiseResolved] = useState(false);
+  const [printerInfo, setPrinterInfo] = useState({});
+  const [printerInfoPromiseResolved, setPrinterInfoPromiseResolved] = useState(false);
+  const [themeStyle, setThemeStyle] = useState(window.localStorage.getItem('themeMode') !== null ? window.localStorage.getItem('themeMode') : 'light');
 
   useEffect(() => {
     if (window.localStorage.getItem('token') !== null) {
+
+      printerService.getStatus().then((data) => {
+        setPrinterStatus(data);
+        setPrinterStatusPromiseResolved(true);
+      });
       
       userService.lookup().then((data) => {
 
@@ -84,6 +94,11 @@ function App() {
 
       });
 
+      printerService.getInfo().then((data) => {
+        setPrinterInfo(data);
+        setPrinterInfoPromiseResolved(true);
+      });
+
     } else {
       setUser({
         authorized: false
@@ -91,12 +106,14 @@ function App() {
       setUserPromiseResolved(true);
     }
 
+
+
   }, []);
 
   // if data has not been fetched yet
   if (!userPromiseResolved) {
     return (
-      <MuiThemeProvider theme={themeStyle.mode !== 'dark' ? theme_light : theme_dark}>
+      <MuiThemeProvider theme={themeStyle !== 'dark' ? theme_light : theme_dark}>
         <CssBaseline />
         <LoadingWithIcon />
       </MuiThemeProvider>
@@ -105,76 +122,83 @@ function App() {
 
   // otherwise
   return (
-    <MuiThemeProvider theme={themeStyle.mode !== 'dark' ? theme_light : theme_dark}>
-      <UserContext.Provider value={user}>
-        <Router>
-          <div>
-            <CssBaseline />
+    <ThemeContext.Provider value={{themeStyle: themeStyle, setThemeStyle: setThemeStyle}}>
+      <MuiThemeProvider theme={themeStyle !== 'dark' ? theme_light : theme_dark}>
+        <UserContext.Provider value={user}>
+          <PrinterContext.Provider value={{ status: printerStatus, setStatus: setPrinterStatus, info: printerInfo, setInfo: setPrinterInfo }}>
+            <Router>
+              <div>
+                <CssBaseline />
 
-            { authorized ? (
-              <div>  
-                <SocketContext.Consumer>
-                  { socket => (
-                    
-                    <UserContext.Consumer>
-                      {user => (
-                        <div>
+                { authorized ? (
+                  <div>  
+                    <SocketContext.Consumer>
+                      { socket => (
+                        
+                        <UserContext.Consumer>
+                          {user => (
+                            <PrinterContext.Consumer>
+                              
+                              {printer => (
+                                <div>
+                                  <Route exact path="/" render={ props => (                        
+                                    <Home user={user} socket={socket} printer={printer} />        
+                                  )} />
+      
+                                  <Route exact path="/controls" render={ props => (
+                                    <Controls printer={printer} />
+                                  )} />
+      
+                                  <Route exact path="/files" render={ props => (
+                                    <Files />
+                                  )} />
+      
+                                  <Route exact path="/settings" render={ props => (
+                                    <Settings />
+                                  )} />
+      
+                                  <Route exact path="/settings/connection" render={ props => (
+                                    <ConnectionSettings />
+                                  )} />
+      
+                                  <Route exact path="/settings/printer" render={ props => (
+                                    <PrinterSettings />
+                                  )} />
+      
+                                  <Route exact path="/settings/accounts" render={ props => (
+                                    <AccountSettings {...props} />
+                                  )} />
+      
+                                  <Route exact path="/settings/accounts/add" render={ props => (
+                                    <AddAccount {...props} />
+                                  )} />
+                                </div>
+                              )}
 
-                          <Route exact path="/" render={ props => (                        
-                            <Home user={user} socket={socket} />        
-                          )} />
-
-                          <Route exact path="/controls" render={ props => (
-                            <Controls />
-                          )} />
-
-                          <Route exact path="/files" render={ props => (
-                            <Files />
-                          )} />
-
-                          <Route exact path="/settings" render={ props => (
-                            <Settings />
-                          )} />
-
-                          <Route exact path="/settings/connection" render={ props => (
-                            <ConnectionSettings />
-                          )} />
-
-                          <Route exact path="/settings/printer" render={ props => (
-                            <PrinterSettings />
-                          )} />
-
-                          <Route exact path="/settings/accounts" render={ props => (
-                            <AccountSettings {...props} />
-                          )} />
-
-                          <Route exact path="/settings/accounts/add" render={ props => (
-                            <AddAccount {...props} />
-                          )} />
-
-                        </div> 
+                            </PrinterContext.Consumer> 
+                          )}
+                        </UserContext.Consumer>
                       )}
-                    </UserContext.Consumer>
+                    </SocketContext.Consumer>
 
-                  )}
-                </SocketContext.Consumer>
+                  </div>
+                ) : (<RedirectToLogin />)
+                }
+
+                <Route exact path="/login" render={ props => (
+                  <UserContext.Consumer>
+                    { user => (
+                      <Login user={user} />
+                    )}
+                  </UserContext.Consumer>
+                )} />
 
               </div>
-            ) : (<RedirectToLogin />)
-            }
-
-            <Route exact path="/login" render={ props => (
-              <UserContext.Consumer>
-                { user => (
-                  <Login user={user} />
-                )}
-              </UserContext.Consumer>
-            )} />
-
-          </div>
-        </Router>
-      </UserContext.Provider>
-    </MuiThemeProvider>
+            </Router>
+          </PrinterContext.Provider>
+        </UserContext.Provider>
+      </MuiThemeProvider>
+    </ThemeContext.Provider>
   );
 }
 

@@ -15,6 +15,7 @@ import FolderIcon from '@material-ui/icons/Folder';
 import ControlCameraIcon from '@material-ui/icons/ControlCamera';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 import SettingsIcon from '@material-ui/icons/Settings';
+import NightsStayIcon from '@material-ui/icons/NightsStay';
 import { Link } from 'react-router-dom';
 
 import { UserContext } from '../contexts/user.context';
@@ -49,7 +50,7 @@ const useStyles = makeStyles(theme => ({
 export default function SideDrawer(props) {
   const classes = useStyles();
 
-  const themeStyle = useContext(ThemeContext);
+  const themeContext = useContext(ThemeContext);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -57,10 +58,12 @@ export default function SideDrawer(props) {
   }
 
   const handleDarkModeClick = () => {
-    if (themeStyle.mode === 'light') {
-      themeStyle.mode = 'dark';
+    if (themeContext.themeStyle === 'light') {
+      themeContext.setThemeStyle('dark');
+      window.localStorage.setItem('themeMode', 'dark');
     } else {
-      themeStyle.mode = 'light';
+      themeContext.setThemeStyle('light');
+      window.localStorage.setItem('themeMode', 'light');
     }
   }
 
@@ -107,13 +110,13 @@ export default function SideDrawer(props) {
               <Divider />
               <List>
                 <Link to="/settings" className={classes.link} >
-                  <ListItem button selected={ props.selectedPage === 'files' }>
+                  <ListItem button selected={ props.selectedPage === 'settings' }>
                     <ListItemIcon><SettingsIcon /></ListItemIcon>
                     <ListItemText primary="Settings" />
                   </ListItem>
                 </Link>
                 <ListItem button onClick={handleDarkModeClick}>
-                  <ListItemIcon><SettingsIcon /></ListItemIcon>
+                  <ListItemIcon><NightsStayIcon /></ListItemIcon>
                   <ListItemText primary="Dark Mode" />
                 </ListItem>
                 <ListItem button onClick={handleLogout}>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -12,6 +12,7 @@ import Dashboard from '../components/dashboard.component';
 import Snackbar from '../components/snackbar.component';
 import { printerService } from '../services/printer.service';
 import { checkResponse } from '../helpers/api.helper';
+import { PrinterContext } from '../contexts/printer.context';
 
 const useStyles = makeStyles(theme => ({
   main: {
@@ -71,6 +72,7 @@ const useStyles = makeStyles(theme => ({
 export default function PrinterSettings() {
   const classes = useStyles();
   const snackbar = useRef();
+  const printer = useContext(PrinterContext);
 
   const [txtName, setTxtName] = useState('');
   const [txtNameError, setTxtNameError] = useState({
@@ -116,6 +118,10 @@ export default function PrinterSettings() {
         const responseCheck = checkResponse(data);
 
         if (responseCheck.valid) {
+          printer.setInfo({
+            name: data.name
+          });
+
           setSnackbarMessage({
             type: 'success',
             message: 'Printer Details successfully set.'

@@ -41,7 +41,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default function Status() {
+export default function Status(props) {
   const classes = useStyles();
 
   const [loadedFile, setLoadedFile] = useState({ id: window.sessionStorage.getItem('print_file_id'), name: window.sessionStorage.getItem('print_file_name')});
@@ -52,21 +52,21 @@ export default function Status() {
         <div className={classes.details}>
           <CardContent className={classes.content}>
             <Typography component="h5" variant="h5">
-              My Mobile 3D-Printer
+              {props.printer.info.name}
             </Typography>
-            <Typography component="span" variant="subtitle1" color="textSecondary">
-              Connected
+            <Typography component="span" variant="subtitle1" color={props.printer.status.ready ? 'textSecondary' : 'error'}>
+              {props.printer.status.ready ? 'Connected' : 'Not Connected'}
             </Typography>
             <Typography component="span" variant="subtitle1">
-              &nbsp;-&nbsp;
+              {props.printer.status.ready ? (<div>&nbsp;-&nbsp</div>) : (<div></div>)}
             </Typography>
             <Typography component="span" variant="subtitle1" color="primary">
-              Ready
+              {props.printer.status.ready ? props.printer.status.busy ? 'Printing...' : 'Ready' : (<div></div>)}
             </Typography>
             <Typography variant="subtitle1" color={loadedFile.id !== null ? 'initial' : 'error'}>
-              { loadedFile.id !== null ? loadedFile.name : 'No file loaded' }
+              { !props.printer.status.ready || loadedFile.id !== null ? loadedFile.name : 'No file loaded' }
             </Typography>
-            { loadedFile.id !== null ? (<div></div>): (
+            { !props.printer.status.ready || loadedFile.id !== null ? (<div></div>): (
               <ButtonGroup className={classes.buttonGroup} color="primary" aria-label="outlined primary button group">
                 <Button>
                   <Link to="/files" className={classes.link} >
@@ -77,13 +77,13 @@ export default function Status() {
             )}
           </CardContent>
           <div className={classes.controls}>
-            <IconButton aria-label="pause" disabled>
+            <IconButton aria-label="pause" disabled={!props.printer.status.ready && !props.printer.status.busy}>
               <PauseIcon />
             </IconButton>
-            <IconButton aria-label="play" disabled>
+            <IconButton aria-label="play" disabled={(!props.printer.status.ready && props.printer.status.busy) || loadedFile.id === null}>
               <PlayArrowIcon className={classes.playIcon} />
             </IconButton>
-            <IconButton aria-label="stop" disabled>
+            <IconButton aria-label="stop" disabled={!props.printer.status.ready && !props.printer.status.busy}>
               <StopIcon />
             </IconButton>
           </div>

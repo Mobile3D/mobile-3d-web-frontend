@@ -99,15 +99,12 @@ export default function Home(props) {
             <Typography component="h1" variant="h3" align="center" color="textPrimary" gutterBottom>
               Welcome Back, {props.user.firstname + ' ' + props.user.lastname}.
             </Typography>
-            <Typography variant="h5" align="center" color="textSecondary" paragraph>
-              Your 3D-Printer is ready for You.
-            </Typography>
           </div>
           <Grid container className={classes.root} spacing={4}>
             <Grid item xs={12}>
               <Grid container className={classes.options} justify="center" spacing={4}>
                 <Grid item>
-                  <Status />
+                  <Status printer={props.printer} />
                 </Grid>
               </Grid>
             </Grid>

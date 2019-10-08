@@ -25,7 +25,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default function Controls() {
+export default function Controls(props) {
   const classes = useStyles();
 
   return (
@@ -40,7 +40,7 @@ export default function Controls() {
           <Grid item xs={12}>
             <Grid container className={classes.options} justify="center" spacing={4}>
               <Grid item>
-                <Status />
+                <Status printer={props.printer} />
               </Grid>
             </Grid>
           </Grid>

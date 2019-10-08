@@ -82,7 +82,7 @@ export default function Login() {
   }
 
   function handleChkRememberMeChange(e) {
-    setChkRememberMe(e.target.value);
+    setChkRememberMe(!chkRememberMe);
   }
 
   function handleSubmit(e) {
@@ -100,7 +100,8 @@ export default function Login() {
       
       userService.login({
         username: txtUsername,
-        password: txtPassword
+        password: txtPassword,
+        remember: chkRememberMe
       }).then((data) => {
 
         const responseCheck = checkResponse(data);

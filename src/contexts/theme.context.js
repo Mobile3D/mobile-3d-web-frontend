@@ -1,5 +1,5 @@
 import React from 'react';
 
-export const theme = { mode: 'light' };
+export const theme = { themeStyle: 'light', setThemeStyle: () => {} };
 
 export const ThemeContext = React.createContext(theme);
