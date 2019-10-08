@@ -113,10 +113,12 @@ function App() {
   // if data has not been fetched yet
   if (!userPromiseResolved) {
     return (
-      <MuiThemeProvider theme={themeStyle !== 'dark' ? theme_light : theme_dark}>
-        <CssBaseline />
-        <LoadingWithIcon />
-      </MuiThemeProvider>
+      <ThemeContext.Provider value={{themeStyle: themeStyle, setThemeStyle: setThemeStyle}}>
+        <MuiThemeProvider theme={themeStyle !== 'dark' ? theme_light : theme_dark}>
+          <CssBaseline />
+          <LoadingWithIcon />
+        </MuiThemeProvider>
+      </ThemeContext.Provider>
     );
   }
 

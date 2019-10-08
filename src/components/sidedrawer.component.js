@@ -16,6 +16,7 @@ import ControlCameraIcon from '@material-ui/icons/ControlCamera';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 import SettingsIcon from '@material-ui/icons/Settings';
 import NightsStayIcon from '@material-ui/icons/NightsStay';
+import NightsStayOutlinedIcon from '@material-ui/icons/NightsStayOutlined';
 import { Link } from 'react-router-dom';
 
 import { UserContext } from '../contexts/user.context';
@@ -107,7 +108,14 @@ export default function SideDrawer(props) {
                   </ListItem>
                 </Link>
               </List>
-              <Divider />
+              <Divider/>
+              <List>
+                <ListItem button onClick={handleDarkModeClick}>
+                  <ListItemIcon>{themeContext.themeStyle === 'dark' ? (<NightsStayIcon/>) : (<NightsStayOutlinedIcon/>)}</ListItemIcon>
+                  <ListItemText primary="Dark Mode" />
+                </ListItem>
+              </List>
+              <Divider/>
               <List>
                 <Link to="/settings" className={classes.link} >
                   <ListItem button selected={ props.selectedPage === 'settings' }>
@@ -115,10 +123,6 @@ export default function SideDrawer(props) {
                     <ListItemText primary="Settings" />
                   </ListItem>
                 </Link>
-                <ListItem button onClick={handleDarkModeClick}>
-                  <ListItemIcon><NightsStayIcon /></ListItemIcon>
-                  <ListItemText primary="Dark Mode" />
-                </ListItem>
                 <ListItem button onClick={handleLogout}>
                   <ListItemIcon><PowerSettingsNewIcon /></ListItemIcon>
                   <ListItemText primary="Logout" />
