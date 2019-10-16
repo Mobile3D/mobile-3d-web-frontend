@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Card from '@material-ui/core/Card';
@@ -45,6 +45,65 @@ export default function Status(props) {
   const classes = useStyles();
 
   const [loadedFile, setLoadedFile] = useState({ id: window.sessionStorage.getItem('print_file_id'), name: window.sessionStorage.getItem('print_file_name')});
+  const [printerStatus, setPrinterStatus] = useState({});
+  const [printStatus, setPrintStatus] = useState('');
+
+  useEffect(() => {
+    if (props.printer.status !== undefined) {
+      setPrinterStatus({
+        connected: props.printer.status.connected,
+        ready: props.printer.status.ready,
+        busy: props.printer.status.busy
+      });
+    }
+  }, [props.printer.status]);
+
+  const handlePlayButtonClick = (e) => {
+    props.socket.emit('printFile', window.sessionStorage.getItem('print_file_id'));
+    setPrinterStatus({
+      connected: printerStatus.connected,
+      ready: false,
+      busy: printerStatus.busy
+    });
+    props.printer.setStatus(printerStatus);
+  }
+
+  const handleStopButtonClick = (e) => {
+    props.socket.emit('cancelPrint');
+  }
+
+  props.socket.on('printLog', (e) => {
+    //console.log(e);
+  });
+
+  props.socket.on('printStatus', (status) => {
+
+    console.log(status);
+    setPrintStatus(status);
+    
+    if (status === 'ready') {
+      setPrinterStatus({
+        connected: printerStatus.connected,
+        ready: true,
+        busy: printerStatus.busy
+      });
+    } else if (status === 'completed') {
+      window.sessionStorage.removeItem('print_file_id');
+      window.sessionStorage.removeItem('print_file_name');
+      setLoadedFile({
+        id: null,
+        name: null
+      });
+    } else if (status === 'stopped') {
+      setPrinterStatus({
+        connected: printerStatus.connected,
+        ready: true,
+        busy: printerStatus.busy
+      });
+    }
+    props.printer.setStatus(printerStatus);
+
+  });
 
   return (
     <div className={classes.root}>
@@ -54,19 +113,19 @@ export default function Status(props) {
             <Typography component="h5" variant="h5">
               {props.printer.info.name}
             </Typography>
-            <Typography component="span" variant="subtitle1" color={props.printer.status.ready ? 'textSecondary' : 'error'}>
-              {props.printer.status.ready ? 'Connected' : 'Not Connected'}
+            <Typography component="span" variant="subtitle1" color={printerStatus.connected ? 'textSecondary' : 'error'}>
+              {printerStatus.connected ? 'Connected' : 'Not Connected'}
             </Typography>
             <Typography component="span" variant="subtitle1">
-              {props.printer.status.ready ? (<div>&nbsp;-&nbsp</div>) : (<div></div>)}
+              {printerStatus.connected ? (<span>&nbsp;-&nbsp;</span>) : (<span></span>)}
             </Typography>
-            <Typography component="span" variant="subtitle1" color="primary">
-              {props.printer.status.ready ? props.printer.status.busy ? 'Printing...' : 'Ready' : (<div></div>)}
+            <Typography component="span" variant="subtitle1" color={printStatus === 'stopping' ? 'error' : 'primary'}>
+              {printerStatus.connected ? !printerStatus.ready ? printStatus === 'stopping' ? 'Stopping...' : 'Printing...' : 'Ready' : (<div></div>)}
             </Typography>
             <Typography variant="subtitle1" color={loadedFile.id !== null ? 'initial' : 'error'}>
-              { !props.printer.status.ready || loadedFile.id !== null ? loadedFile.name : 'No file loaded' }
+              { !printerStatus.connected || loadedFile.id !== null ? loadedFile.name : 'No file loaded' }
             </Typography>
-            { !props.printer.status.ready || loadedFile.id !== null ? (<div></div>): (
+            { !printerStatus.connected || loadedFile.id !== null ? (<div></div>): (
               <ButtonGroup className={classes.buttonGroup} color="primary" aria-label="outlined primary button group">
                 <Button>
                   <Link to="/files" className={classes.link} >
@@ -77,13 +136,13 @@ export default function Status(props) {
             )}
           </CardContent>
           <div className={classes.controls}>
-            <IconButton aria-label="pause" disabled={!props.printer.status.ready && !props.printer.status.busy}>
+            {/* <IconButton aria-label="pause" disabled={!printerStatus.ready && !printerStatus.busy}>
               <PauseIcon />
-            </IconButton>
-            <IconButton aria-label="play" disabled={(!props.printer.status.ready && props.printer.status.busy) || loadedFile.id === null}>
+            </IconButton> */}
+            <IconButton aria-label="play" disabled={!(printerStatus.connected && printerStatus.ready && loadedFile.id !== null)} onClick={handlePlayButtonClick}>
               <PlayArrowIcon className={classes.playIcon} />
             </IconButton>
-            <IconButton aria-label="stop" disabled={!props.printer.status.ready && !props.printer.status.busy}>
+            <IconButton aria-label="stop" disabled={!(printerStatus.connected && !printerStatus.ready)} onClick={handleStopButtonClick}>
               <StopIcon />
             </IconButton>
           </div>

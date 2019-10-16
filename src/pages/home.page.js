@@ -104,7 +104,7 @@ export default function Home(props) {
             <Grid item xs={12}>
               <Grid container className={classes.options} justify="center" spacing={4}>
                 <Grid item>
-                  <Status printer={props.printer} />
+                  <Status printer={props.printer} socket={props.socket} />
                 </Grid>
               </Grid>
             </Grid>

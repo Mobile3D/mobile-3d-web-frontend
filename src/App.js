@@ -21,6 +21,7 @@ import { SocketContext } from './contexts/socket.context';
 import { ThemeContext } from './contexts/theme.context';
 import PrinterSettings from './pages/printersettings.page';
 
+
 //create consistent theme styling for app
 const theme_light = createMuiTheme({
   palette: {
@@ -127,7 +128,7 @@ function App() {
     <ThemeContext.Provider value={{themeStyle: themeStyle, setThemeStyle: setThemeStyle}}>
       <MuiThemeProvider theme={themeStyle !== 'dark' ? theme_light : theme_dark}>
         <UserContext.Provider value={user}>
-          <PrinterContext.Provider value={{ status: printerStatus, setStatus: setPrinterStatus, info: printerInfo, setInfo: setPrinterInfo }}>
+          <PrinterContext.Provider value={{ status: printerStatus.status, setStatus: setPrinterStatus, info: printerInfo, setInfo: setPrinterInfo }}>
             <Router>
               <div>
                 <CssBaseline />
@@ -148,7 +149,7 @@ function App() {
                                   )} />
       
                                   <Route exact path="/controls" render={ props => (
-                                    <Controls printer={printer} />
+                                    <Controls socket={socket} printer={printer} />
                                   )} />
       
                                   <Route exact path="/files" render={ props => (
