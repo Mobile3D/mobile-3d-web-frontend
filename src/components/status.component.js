@@ -11,6 +11,8 @@ import PauseIcon from '@material-ui/icons/Pause';
 import StopIcon from '@material-ui/icons/Stop';
 import { Link } from 'react-router-dom';
 
+import { printerService } from '../services/printer.service';
+
 const useStyles = makeStyles(theme => ({
   root: {
     width: 600,
@@ -47,16 +49,14 @@ export default function Status(props) {
   const [loadedFile, setLoadedFile] = useState({ id: window.sessionStorage.getItem('print_file_id'), name: window.sessionStorage.getItem('print_file_name')});
   const [printerStatus, setPrinterStatus] = useState({});
   const [printStatus, setPrintStatus] = useState('');
+  const [printerStatusPromiseResolved, setPrinterStatusPromiseResolved] = useState(false);
 
   useEffect(() => {
-    if (props.printer.status !== undefined) {
-      setPrinterStatus({
-        connected: props.printer.status.connected,
-        ready: props.printer.status.ready,
-        busy: props.printer.status.busy
-      });
-    }
-  }, [props.printer.status]);
+    printerService.getStatus().then((data) => {
+      setPrinterStatus(data);
+      setPrinterStatusPromiseResolved(true);
+    });
+  }, []);
 
   const handlePlayButtonClick = (e) => {
     props.socket.emit('printFile', window.sessionStorage.getItem('print_file_id'));
@@ -65,7 +65,6 @@ export default function Status(props) {
       ready: false,
       busy: printerStatus.busy
     });
-    props.printer.setStatus(printerStatus);
   }
 
   const handleStopButtonClick = (e) => {
@@ -77,31 +76,36 @@ export default function Status(props) {
   });
 
   props.socket.on('printStatus', (status) => {
-
-    console.log(status);
-    setPrintStatus(status);
     
-    if (status === 'ready') {
-      setPrinterStatus({
-        connected: printerStatus.connected,
-        ready: true,
-        busy: printerStatus.busy
-      });
-    } else if (status === 'completed') {
-      window.sessionStorage.removeItem('print_file_id');
-      window.sessionStorage.removeItem('print_file_name');
-      setLoadedFile({
-        id: null,
-        name: null
-      });
-    } else if (status === 'stopped') {
-      setPrinterStatus({
-        connected: printerStatus.connected,
-        ready: true,
-        busy: printerStatus.busy
-      });
+    if (status !== printStatus) {
+      setPrintStatus(status);
+      if (status === 'ready') {
+        setPrinterStatus({
+          connected: printerStatus.connected,
+          ready: true,
+          busy: printerStatus.busy
+        });
+      } else if (status === 'printing') {
+        setPrinterStatus({
+          connected: printerStatus.connected,
+          ready: false,
+          busy: printerStatus.busy
+        });
+      } else if (status === 'completed') {
+        window.sessionStorage.removeItem('print_file_id');
+        window.sessionStorage.removeItem('print_file_name');
+        setLoadedFile({
+          id: null,
+          name: null
+        });
+      } else if (status === 'stopped') {
+        setPrinterStatus({
+          connected: printerStatus.connected,
+          ready: true,
+          busy: printerStatus.busy
+        });
+      }
     }
-    props.printer.setStatus(printerStatus);
 
   });
 
@@ -142,7 +146,7 @@ export default function Status(props) {
             <IconButton aria-label="play" disabled={!(printerStatus.connected && printerStatus.ready && loadedFile.id !== null)} onClick={handlePlayButtonClick}>
               <PlayArrowIcon className={classes.playIcon} />
             </IconButton>
-            <IconButton aria-label="stop" disabled={!(printerStatus.connected && !printerStatus.ready)} onClick={handleStopButtonClick}>
+            <IconButton aria-label="stop" disabled={!(printerStatus.connected && !printerStatus.ready) || printStatus === 'stopping'} onClick={handleStopButtonClick}>
               <StopIcon />
             </IconButton>
           </div>

@@ -128,7 +128,7 @@ function App() {
     <ThemeContext.Provider value={{themeStyle: themeStyle, setThemeStyle: setThemeStyle}}>
       <MuiThemeProvider theme={themeStyle !== 'dark' ? theme_light : theme_dark}>
         <UserContext.Provider value={user}>
-          <PrinterContext.Provider value={{ status: printerStatus.status, setStatus: setPrinterStatus, info: printerInfo, setInfo: setPrinterInfo }}>
+          <PrinterContext.Provider value={{ status: printerStatus, setStatus: setPrinterStatus, info: printerInfo, setInfo: setPrinterInfo }}>
             <Router>
               <div>
                 <CssBaseline />
