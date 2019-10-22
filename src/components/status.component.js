@@ -12,6 +12,7 @@ import StopIcon from '@material-ui/icons/Stop';
 import { Link } from 'react-router-dom';
 
 import { printerService } from '../services/printer.service';
+import Spinner from '../components/spinner.component';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -108,6 +109,14 @@ export default function Status(props) {
     }
 
   });
+
+  if (!printerStatusPromiseResolved) {
+    return (
+      <div>
+        <Spinner />
+      </div>
+    )
+  }
 
   return (
     <div className={classes.root}>
