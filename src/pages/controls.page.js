@@ -6,6 +6,7 @@ import Grid from '@material-ui/core/Grid';
 import Dashboard from '../components/dashboard.component';
 import Status from '../components/status.component';
 import AxisControls from '../components/axiscontrols.component';
+import ControlSettings from '../components/controlsettings.component';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -22,6 +23,9 @@ const useStyles = makeStyles(theme => ({
   },
   controlWindow: {
     marginTop: theme.spacing(4),
+  },
+  settingsWindow: {
+    marginTop: theme.spacing(6),
   },
 }));
 
@@ -47,6 +51,9 @@ export default function Controls(props) {
         </Grid>
         <div className={classes.controlWindow}>
           <AxisControls />
+        </div>
+        <div className={classes.settingsWindow}>
+          <ControlSettings />
         </div>
       </Dashboard>
     </div>

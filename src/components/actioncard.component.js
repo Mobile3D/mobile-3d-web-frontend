@@ -12,7 +12,7 @@ import ControlCameraIcon from '@material-ui/icons/ControlCamera';
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 import SettingsIcon from '@material-ui/icons/Settings';
 import LaunchIcon from '@material-ui/icons/Launch';
-import { makeStyles } from '@material-ui/styles';
+import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles(theme => ({
   cardActionArea: {

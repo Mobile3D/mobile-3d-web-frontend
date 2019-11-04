@@ -10,7 +10,7 @@ import PrintIcon from '@material-ui/icons/Print';
 import SignalCellularAltIcon from '@material-ui/icons/SignalCellularAlt';
 import SupervisorAccountIcon from '@material-ui/icons/SupervisorAccount';
 import InfoIcon from '@material-ui/icons/Info';
-import { makeStyles } from '@material-ui/styles';
+import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles(theme => ({
   cardActionArea: {
