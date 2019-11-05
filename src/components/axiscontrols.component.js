@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import Button from '@material-ui/core/Button';
 
@@ -44,9 +43,6 @@ export default function AxisControls() {
 
   return (
     <div className={classes.root}>
-      <Typography className={classes.title} component="h1" variant="h5">
-        Axis Controls
-      </Typography>
       <Grid container spacing={4} justify="center">
         <XYAxisControl />
         <ZAxisControl />

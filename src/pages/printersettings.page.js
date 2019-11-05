@@ -162,7 +162,7 @@ export default function PrinterSettings() {
   }
 
   return (
-    <Dashboard navTitle="Printer Settings">
+    <Dashboard navTitle="Printer Settings" backTo="settings">
       <main className={classes.main}>
         <CssBaseline />
         <Typography variant="h5" align="center" color="textPrimary" paragraph>

@@ -251,7 +251,7 @@ export default function AddAccount() {
 
   return userAdded ? (<Redirect exact to="/settings/accounts"/>
   ) : (
-    <Dashboard navTitle="Account Settings">
+    <Dashboard navTitle="Account Settings" backTo="accountsettings">
       <main className={classes.main}>
         <CssBaseline />
         <Typography variant="h5" align="center" color="textPrimary" paragraph>

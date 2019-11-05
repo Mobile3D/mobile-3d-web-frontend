@@ -39,7 +39,7 @@ export default function Settings() {
   const classes = useStyles();
 
   return (
-    <Dashboard navTitle="Settings">
+    <Dashboard navTitle="Settings" backTo="home">
       <div className={classes.heroContent}>
         <Typography component="h1" variant="h3" align="center" color="textPrimary" gutterBottom>
           Settings

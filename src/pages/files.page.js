@@ -194,7 +194,7 @@ export default function Files(props) {
   return (
     <div onDragOver={handleUploadDialogOpen}>
       <div className={classes.fullscreen} >
-        <Dashboard navTitle="Files">
+        <Dashboard navTitle="Files" backTo="home">
           <div className={classes.heroContent}>
             <Typography component="h1" variant="h3" align="center" color="textPrimary" gutterBottom>
               Files

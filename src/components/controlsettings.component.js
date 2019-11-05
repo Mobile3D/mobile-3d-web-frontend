@@ -59,9 +59,6 @@ export default function ControlSettings() {
 
   return (
     <div className={classes.root}>
-      <Typography className={classes.title} component="h1" variant="h5">
-        Settings
-      </Typography>
       <Grid container spacing={4} justify="center">
         <Grid item>
           <Card className={classes.card}>
@@ -77,7 +74,6 @@ export default function ControlSettings() {
                   variant="outlined"
                   type="number"
                   fullWidth
-                  disabled={ fanState === 0 ? true : false}
                   onChange={handleFanSpeedChange}
                   value={numFanSpeed}
                 />

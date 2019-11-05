@@ -65,9 +65,7 @@ function App() {
   const [userPromiseResolved, setUserPromiseResolved] = useState(false);
   const [user, setUser] = useState({});
   const [printerStatus, setPrinterStatus] = useState({});
-  const [printerStatusPromiseResolved, setPrinterStatusPromiseResolved] = useState(false);
   const [printerInfo, setPrinterInfo] = useState({});
-  const [printerInfoPromiseResolved, setPrinterInfoPromiseResolved] = useState(false);
   const [themeStyle, setThemeStyle] = useState(window.localStorage.getItem('themeMode') !== null ? window.localStorage.getItem('themeMode') : 'light');
 
   useEffect(() => {
@@ -75,7 +73,6 @@ function App() {
 
       printerService.getStatus().then((data) => {
         setPrinterStatus(data);
-        setPrinterStatusPromiseResolved(true);
       });
       
       userService.lookup().then((data) => {
@@ -97,7 +94,6 @@ function App() {
 
       printerService.getInfo().then((data) => {
         setPrinterInfo(data);
-        setPrinterInfoPromiseResolved(true);
       });
 
     } else {

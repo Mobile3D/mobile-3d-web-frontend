@@ -94,14 +94,11 @@ export default function AccountSettings(props) {
   const [deleteItemName, setDeleteItemName] = useState('');
   const [deleteItemId, setDeleteItemId] = useState(0);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [update, setUpdate] = useState(false);
 
   const snackbar = useRef();
 
   useEffect(() => {
-    loadUsers();
-  }, []);
-
-  const loadUsers = () => {
     userService.getAll().then((data) => {
 
       const responseCheck = checkResponse(data);
@@ -127,8 +124,9 @@ export default function AccountSettings(props) {
         snackbar.current.handleOpen();
       }
       setUserPromiseResolved(true);
+      setUpdate(false);
     });
-  }
+  }, [accountsContext.new, accountsContext.username, update]);
 
   const handleDeleteClick = (row) => {
     setDeleteItemId(row._id);
@@ -148,7 +146,7 @@ export default function AccountSettings(props) {
       const responseCheck = checkResponse(data);
 
       if (responseCheck.valid) {
-        loadUsers();
+        setUpdate(true);
       } else {
         setSnackbarMessage({
           type: responseCheck.type,
@@ -162,7 +160,7 @@ export default function AccountSettings(props) {
   }
 
   return (
-    <Dashboard navTitle="Account Settings">
+    <Dashboard navTitle="Account Settings" backTo="settings">
       <div className={classes.heroContent}>
         <Typography component="h1" variant="h3" align="center" color="textPrimary" gutterBottom>
           Account Settings

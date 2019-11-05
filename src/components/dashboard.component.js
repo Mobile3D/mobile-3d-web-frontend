@@ -9,7 +9,7 @@ export default function Dashboard(props) {
 
   return (
     <div>
-      <Navbar title={ props.navTitle } selectedPage="not" />
+      <Navbar title={ props.navTitle } selectedPage="not" backTo={props.backTo} />
       { props.children }
     </div>
   )

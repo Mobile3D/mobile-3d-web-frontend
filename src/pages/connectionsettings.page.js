@@ -202,7 +202,7 @@ export default function ConnectionSettings() {
   }
 
   return (
-    <Dashboard navTitle="Connection Settings">
+    <Dashboard navTitle="Connection Settings" backTo="settings">
       <main className={classes.main}>
         <CssBaseline />
         <Typography variant="h5" align="center" color="textPrimary" paragraph>

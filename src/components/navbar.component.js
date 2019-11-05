@@ -6,7 +6,8 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
-
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import { Link } from 'react-router-dom';
 import SideDrawer from './sidedrawer.component';
 
 const useStyles = makeStyles(theme => ({
@@ -61,6 +62,16 @@ const useStyles = makeStyles(theme => ({
       },
     },
   },
+  link: {
+    textDecoration: 'none',
+    color: '#ffffff',
+    '&:focus': {
+      color: '#ffffff',
+    },
+    '&:active': {
+      color: '#ffffff',
+    },
+  },
 }));
 
 export default function Navbar(props) {
@@ -80,9 +91,17 @@ export default function Navbar(props) {
     <div className={classes.root}>
       <AppBar position="fixed">
         <Toolbar>
-          <IconButton className={classes.menuButton} color="inherit" aria-label="Menu" onClick={ handleMenuButtonClick }>
-            <MenuIcon />
-          </IconButton>
+          {props.backTo !== undefined ? (
+            <Link to={ props.backTo === 'settings' ? '/settings' : props.backTo === 'accountsettings' ? '/settings/accounts' : '/'} className={classes.link}>
+              <IconButton className={classes.menuButton} color="inherit" aria-label="Back">
+                <ArrowBackIcon />
+              </IconButton> 
+            </Link>
+          ) : (
+            <IconButton className={classes.menuButton} color="inherit" aria-label="Menu" onClick={ handleMenuButtonClick }>
+              <MenuIcon />
+            </IconButton>
+          )}
           <Typography variant="h6" color="inherit" className={classes.grow}>
             { props.title }
           </Typography>
