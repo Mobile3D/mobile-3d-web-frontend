@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
@@ -38,11 +38,24 @@ const useStyles = makeStyles(theme => ({
     padding: '10px',
     color: '#000000',
     textAlign: 'left',
+    overflowY: 'scroll',
   },
 }));
 
 export default function Console(props) {
   const classes = useStyles();
+
+  const [txtCommand, setTxtCommand] = useState('');
+
+  const handleTxtCommandChange = (e) => {
+    setTxtCommand(e.target.value);
+  }
+
+  const handleBtnSendClick = (e) => {
+    if (txtCommand !== '') {
+      console.log(txtCommand);
+    }
+  }
 
   return (
     <div className={classes.root}>
@@ -61,10 +74,12 @@ export default function Console(props) {
                   variant="outlined"
                   type="text"
                   fullWidth
+                  onChange={handleTxtCommandChange}
+                  value={txtCommand}
                 />
               </Grid>  
               <Grid item sm={2} className={classes.gridItem}>
-                <Button className={classes.button} variant="contained" color="primary" fullWidth>Send</Button>
+                <Button className={classes.button} variant="contained" color="primary" fullWidth onClick={handleBtnSendClick}>Send</Button>
               </Grid>            
             </Grid>            
           </CardContent>

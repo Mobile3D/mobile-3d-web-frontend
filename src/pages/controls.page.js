@@ -8,6 +8,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Collapse from '@material-ui/core/Collapse';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
+import Divider from '@material-ui/core/Divider';
 
 import Dashboard from '../components/dashboard.component';
 import Status from '../components/status.component';
@@ -76,6 +77,7 @@ export default function Controls(props) {
         </Grid>
 
         <List>
+          <Divider/>
           <ListItem button className={classes.listItem} onClick={handleOpenConsole}>
             <ListItemText primary="Console" secondary="Watch the log and send manual commands" />
             {openConsole ? <ExpandLess /> : <ExpandMore />}
@@ -93,6 +95,7 @@ export default function Controls(props) {
               </Grid>
             </div>
           </Collapse>
+          <Divider/>
           <ListItem button className={classes.listItem} onClick={handleOpenControlSettings}>
             <ListItemText primary="Control Settings" secondary="Set the fan speed, the temperature and extrude or retract" />
             {openControlSettings ? <ExpandLess /> : <ExpandMore />}
@@ -102,6 +105,7 @@ export default function Controls(props) {
               <ControlSettings />
             </div>
           </Collapse>
+          <Divider/>
           <ListItem button className={classes.listItem} onClick={handleOpenAxisControl}>
             <ListItemText primary="Axis Controls" secondary="Move the axis of the printer" />
             {openAxisControls ? <ExpandLess /> : <ExpandMore />}
@@ -111,6 +115,7 @@ export default function Controls(props) {
               <AxisControls />
             </div>
           </Collapse>
+          <Divider/>
         </List>
 
       </Dashboard>

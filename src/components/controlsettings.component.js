@@ -46,14 +46,32 @@ export default function ControlSettings() {
 
   const [fanState, setFanState] = useState(0);
   const [numFanSpeed, setNumFanSpeed] = useState(1);
+  const [numLength, setNumLength] = useState(1);
+  const [numTemperature, setNumTemperature] = useState(0);
+  
 
   const handleFanState = (state) => {
     setFanState(state);
   }
 
-  const handleFanSpeedChange = (e) => {
+  const handleNumFanSpeedChange = (e) => {
     if (e.target.value > 0 && e.target.value <= 100) {
       setNumFanSpeed(e.target.value);
+    }
+  }
+
+  const handleNumLengthChange = (e) => {
+    if (e.target.value > 0 && e.target.value <= 100) {
+      setNumLength(e.target.value);
+    }
+  }
+
+  const handleNumTemperatureChange = (e) => {
+
+    if (e.target.value === '') {
+      setNumFanSpeed(numFanSpeed);
+    } else if (e.target.value >= 0 && e.target.value <= 200) {
+      setNumTemperature(e.target.value);
     }
   }
 
@@ -74,7 +92,7 @@ export default function ControlSettings() {
                   variant="outlined"
                   type="number"
                   fullWidth
-                  onChange={handleFanSpeedChange}
+                  onChange={handleNumFanSpeedChange}
                   value={numFanSpeed}
                 />
               </div>
@@ -97,6 +115,8 @@ export default function ControlSettings() {
                   variant="outlined"
                   type="number"
                   fullWidth
+                  onChange={handleNumLengthChange}
+                  value={numLength}
                 />
               </div>
               <div className={classes.settingsButton}><Button variant="contained" size="small" fullWidth>Extrude</Button></div>
@@ -118,6 +138,8 @@ export default function ControlSettings() {
                   variant="outlined"
                   type="number"
                   fullWidth
+                  onChange={handleNumTemperatureChange}
+                  value={numTemperature}
                 />
               </div>
               <div className={classes.settingsButton}><Button variant="contained" size="small" fullWidth>Set Heatend</Button></div>
