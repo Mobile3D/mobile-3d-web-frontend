@@ -11,6 +11,7 @@ import Snackbar from '@material-ui/core/Snackbar';
 import SnackbarContent from '@material-ui/core/SnackbarContent';
 import WarningIcon from '@material-ui/icons/Warning';
 import { makeStyles } from '@material-ui/core/styles';
+import Button from '@material-ui/core/Button';
 
 const variantIcon = {
   success: CheckCircleIcon,
@@ -106,11 +107,22 @@ const CustomizedSnackbar = forwardRef((props, ref) => {
         autoHideDuration={6000}
         onClose={handleClose}
       >
-        <MySnackbarContentWrapper
-          onClose={handleClose}
-          variant={props.variant}
-          message={props.message}
-        />
+        { props.printAction ? (
+          <MySnackbarContentWrapper
+            onClose={handleClose}
+            variant={props.variant}
+            message={props.message}
+            action={(<Button color="secondary" onClick={props.handlePrintNowClick}>
+              Print Now
+            </Button>)}
+          />
+        ) : (
+          <MySnackbarContentWrapper
+            onClose={handleClose}
+            variant={props.variant}
+            message={props.message}
+          />
+        )}
       </Snackbar>
     </div>
   );

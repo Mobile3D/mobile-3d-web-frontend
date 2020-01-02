@@ -6,14 +6,13 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
-import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import Fab from '@material-ui/core/Fab';
 import AddIcon from '@material-ui/icons/Add';
 import { makeStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
-import { Hidden } from '@material-ui/core';
+import { Hidden, Tooltip } from '@material-ui/core';
 
 import Dashboard from '../components/dashboard.component';
 import Spinner from '../components/spinner.component';
@@ -195,9 +194,11 @@ export default function AccountSettings(props) {
                       <TableCell>{row.lastname}</TableCell>
                     </Hidden>
                     <TableCell align="right">
-                      <IconButton onClick={() => handleDeleteClick(row)} aria-label="Delete">
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
+                      <Tooltip title="Delete">
+                        <IconButton onClick={() => handleDeleteClick(row)} aria-label="Delete">
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -209,9 +210,6 @@ export default function AccountSettings(props) {
           <Spinner/>
         )}
         
-        <div className={classes.centering}>
-          <Button className={classes.button} onClick={() => {window.history.back()}} >Back</Button>
-        </div>
         <Link to="/settings/accounts/add" className={classes.link} >
           <Fab variant="extended" size="large" color="primary" aria-label="Add" className={classes.fab}>
             <AddIcon />

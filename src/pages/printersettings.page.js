@@ -198,9 +198,6 @@ export default function PrinterSettings() {
             </Button>
           </form>
           </Paper>
-          <div className={classes.centering}>
-            <Button className={classes.button} onClick={() => {window.history.back()}} >Back</Button>
-          </div>
       </main>
       <Snackbar 
         message={snackbarMessage.message} 

@@ -57,7 +57,6 @@ export default function Controls(props) {
     setOpenConsole(!openConsole);
   }
 
-
   return (
     <div className={classes.root}>
       <Dashboard navTitle="Controls" backTo="home">
@@ -88,7 +87,7 @@ export default function Controls(props) {
                 <Grid item xs={12}>
                   <Grid container className={classes.options} justify="center" spacing={4}>
                     <Grid item>
-                      <Console />
+                      <Console socket={props.socket} />
                     </Grid>
                   </Grid>
                 </Grid>
@@ -102,7 +101,7 @@ export default function Controls(props) {
           </ListItem>
           <Collapse in={openControlSettings} timeout="auto" unmountOnExit>
             <div className={classes.controlWindow}>
-              <ControlSettings />
+              <ControlSettings socket={props.socket} />
             </div>
           </Collapse>
           <Divider/>
@@ -112,7 +111,7 @@ export default function Controls(props) {
           </ListItem>
           <Collapse in={openAxisControls} timeout="auto" unmountOnExit>
             <div className={classes.controlWindow}>
-              <AxisControls />
+              <AxisControls socket={props.socket} />
             </div>
           </Collapse>
           <Divider/>

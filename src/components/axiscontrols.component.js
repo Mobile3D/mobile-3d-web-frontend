@@ -34,7 +34,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default function AxisControls() {
+export default function AxisControls(props) {
   const classes = useStyles();
 
   const [selectedLength, setSelectedLength] = useState(1);
@@ -44,7 +44,7 @@ export default function AxisControls() {
   }
 
   const handleMoveButtonClick = (direction) => {
-    console.log(direction + ';' + selectedLength);
+    props.socket.emit(direction, selectedLength);
   }
 
   return (

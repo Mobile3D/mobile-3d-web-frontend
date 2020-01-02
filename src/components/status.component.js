@@ -7,8 +7,10 @@ import Button from '@material-ui/core/Button';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import IconButton from '@material-ui/core/IconButton';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
+import DeleteIcon from '@material-ui/icons/Delete';
 //import PauseIcon from '@material-ui/icons/Pause';
 import StopIcon from '@material-ui/icons/Stop';
+import Tooltip from '@material-ui/core/Tooltip';
 import { Link } from 'react-router-dom';
 
 import { printerService } from '../services/printer.service';
@@ -64,7 +66,8 @@ export default function Status(props) {
     setPrinterStatus({
       connected: printerStatus.connected,
       ready: false,
-      busy: printerStatus.busy
+      busy: printerStatus.busy,
+      connecting: false
     });
   }
 
@@ -80,17 +83,33 @@ export default function Status(props) {
     
     if (status !== printStatus) {
       setPrintStatus(status);
-      if (status === 'ready') {
+      if (status === 'connected') {
+        setPrinterStatus({
+          connected: true,
+          ready: true,
+          busy: printerStatus.busy,
+          connecting: false
+        });
+      } else if (status === 'connecting') {
+        setPrinterStatus({
+          connected: printerStatus.connected,
+          ready: printerStatus.ready,
+          busy: printerStatus.busy,
+          connecting: true
+        });
+      } else if (status === 'ready') {
         setPrinterStatus({
           connected: printerStatus.connected,
           ready: true,
-          busy: printerStatus.busy
+          busy: printerStatus.busy,
+          connecting: false
         });
       } else if (status === 'printing') {
         setPrinterStatus({
           connected: printerStatus.connected,
           ready: false,
-          busy: printerStatus.busy
+          busy: printerStatus.busy,
+          connecting: false
         });
       } else if (status === 'completed') {
         window.sessionStorage.removeItem('print_file_id');
@@ -103,12 +122,29 @@ export default function Status(props) {
         setPrinterStatus({
           connected: printerStatus.connected,
           ready: true,
-          busy: printerStatus.busy
+          busy: printerStatus.busy,
+          connecting: false
+        });
+      } else if (status === 'disconnected') {
+        setPrinterStatus({
+          connected: false,
+          ready: false,
+          busy: printerStatus.busy,
+          connecting: false
         });
       }
     }
 
   });
+
+  const handleDeleteClick = () => {
+    window.sessionStorage.removeItem('print_file_id');
+    window.sessionStorage.removeItem('print_file_name');
+    setLoadedFile({
+      id: null,
+      name: null
+    });
+  }
 
   if (!printerStatusPromiseResolved) {
     return (
@@ -126,8 +162,9 @@ export default function Status(props) {
             <Typography component="h5" variant="h5">
               {props.printer.info.name}
             </Typography>
-            <Typography component="span" variant="subtitle1" color={printerStatus.connected ? 'textSecondary' : 'error'}>
-              {printerStatus.connected ? 'Connected' : 'Not Connected'}
+            <Typography component="span" variant="subtitle1" color={printerStatus.connected || printerStatus.connecting ? 'textSecondary' : 'error'}>
+              {printerStatus.connected && !printerStatus.connecting ? 'Connected' : 'Not Connected'}
+              {printerStatus.connecting ? 'Connecting...' : ''}
             </Typography>
             <Typography component="span" variant="subtitle1">
               {printerStatus.connected ? (<span>&nbsp;-&nbsp;</span>) : (<span></span>)}
@@ -152,12 +189,30 @@ export default function Status(props) {
             {/* <IconButton aria-label="pause" disabled={!printerStatus.ready && !printerStatus.busy}>
               <PauseIcon />
             </IconButton> */}
-            <IconButton aria-label="play" disabled={!(printerStatus.connected && printerStatus.ready && loadedFile.id !== null)} onClick={handlePlayButtonClick}>
-              <PlayArrowIcon className={classes.playIcon} />
-            </IconButton>
-            <IconButton aria-label="stop" disabled={!(printerStatus.connected && !printerStatus.ready) || printStatus === 'stopping'} onClick={handleStopButtonClick}>
-              <StopIcon />
-            </IconButton>
+
+            { !printerStatus.connected || (printerStatus.ready && loadedFile.id !== null) ? (
+            <Tooltip title="Remove File">
+              <span>
+                <IconButton className={classes.button} onClick={handleDeleteClick} aria-label="Delete">
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </span>
+            </Tooltip>) : (<div></div>)}
+            
+            <Tooltip title="Start Printing">
+              <span>
+                <IconButton aria-label="play" disabled={!(printerStatus.connected && printerStatus.ready && loadedFile.id !== null)} onClick={handlePlayButtonClick}>
+                  <PlayArrowIcon className={classes.playIcon} />
+                </IconButton>
+              </span>
+            </Tooltip>
+            <Tooltip title="Cancel">
+              <span>
+                <IconButton aria-label="stop" disabled={!(printerStatus.connected && !printerStatus.ready) || printStatus === 'stopping'} onClick={handleStopButtonClick}>
+                  <StopIcon />
+                </IconButton>
+              </span>
+            </Tooltip>
           </div>
         </div>
         {/* 

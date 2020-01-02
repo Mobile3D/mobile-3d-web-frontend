@@ -11,6 +11,7 @@ import ConnectionSettings from './pages/connectionsettings.page';
 import AddAccount from './pages/addaccount.page';
 import Files from './pages/files.page';
 import Controls from './pages/controls.page';
+import Info from './pages/info.page';
 import LoadingWithIcon from './pages/loading.page';
 
 import { userService } from './services/users.service';
@@ -29,7 +30,7 @@ const theme_light = createMuiTheme({
           main: '#0078d7',
       },
       secondary: {
-          main: '#9c27b0',
+          main: '#ffffff',
       },
       type: 'light'
   },
@@ -44,7 +45,7 @@ const theme_dark = createMuiTheme({
           main: '#0078d7',
       },
       secondary: {
-          main: '#9c27b0',
+          main: '#ffffff',
       },
       type: 'dark'
   },
@@ -103,8 +104,6 @@ function App() {
       setUserPromiseResolved(true);
     }
 
-
-
   }, []);
 
   // if data has not been fetched yet
@@ -149,7 +148,7 @@ function App() {
                                   )} />
       
                                   <Route exact path="/files" render={ props => (
-                                    <Files />
+                                    <Files socket={socket} />
                                   )} />
       
                                   <Route exact path="/settings" render={ props => (
@@ -170,6 +169,10 @@ function App() {
       
                                   <Route exact path="/settings/accounts/add" render={ props => (
                                     <AddAccount {...props} />
+                                  )} />
+
+                                  <Route exact path="/settings/info" render={ props => (
+                                    <Info {...props} />
                                   )} />
                                 </div>
                               )}

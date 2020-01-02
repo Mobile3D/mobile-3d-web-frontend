@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
@@ -46,6 +46,24 @@ export default function Console(props) {
   const classes = useStyles();
 
   const [txtCommand, setTxtCommand] = useState('');
+  const [logCount, setLogCount] = useState(0);
+  const [log, setLog] = useState([]);
+
+  props.socket.on('printLog', (e) => {
+    if (log[log.length - 1] !== e) {
+      if (log.length > 20) log.shift();
+      setLogCount(logCount + 1);
+      setLog([...log, e]);
+    }
+  });
+
+  props.socket.on('printStatus', (e) => {
+    if (log[log.length - 1] !== e) {
+      if (log.length > 20) log.shift();
+      setLogCount(logCount + 1);
+      setLog([...log, e]);
+    }
+  });
 
   const handleTxtCommandChange = (e) => {
     setTxtCommand(e.target.value);
@@ -53,7 +71,7 @@ export default function Console(props) {
 
   const handleBtnSendClick = (e) => {
     if (txtCommand !== '') {
-      console.log(txtCommand);
+      props.socket.emit('sendManualCommand', txtCommand);
     }
   }
 
@@ -63,7 +81,9 @@ export default function Console(props) {
         <div className={classes.details}>
           <CardContent className={classes.content}>
             <div className={classes.logBox}>
-              test
+              { log.map(text => (
+                <span key={logCount}>{text}<br/></span>
+              ))}
             </div>
             <Grid container spacing={1} justify="center">
               <Grid item sm={10} className={classes.gridItem}>

@@ -14,6 +14,7 @@ import Fab from '@material-ui/core/Fab';
 import AddIcon from '@material-ui/icons/Add';
 import { makeStyles } from '@material-ui/core/styles';
 import { Hidden } from '@material-ui/core';
+import Tooltip from '@material-ui/core/Tooltip';
 
 import Dashboard from '../components/dashboard.component';
 import Snackbar from '../components/snackbar.component';
@@ -135,7 +136,7 @@ export default function Files(props) {
       } else {
         setSnackbarMessage({
           type: responseCheck.type,
-          message: responseCheck.message
+          message: responseCheck.message,
         });
         snackbar.current.handleOpen();
       }
@@ -186,9 +187,14 @@ export default function Files(props) {
     window.sessionStorage.setItem('print_file_name', name);
     setSnackbarMessage({
       type: 'info',
-      message: '"' + name + '" will be printed next. Click the Start-Button on the homescreen to start printing.'
+      message: '"' + name + '" is ready to be printed. You can make some adjustments in the control panel.',
+      printAction: true
     });
     snackbar.current.handleOpen();
+  }
+
+  const handlePrintNowClick = () => {
+    props.socket.emit('printFile', window.sessionStorage.getItem('print_file_id'));
   }
 
   return (
@@ -228,15 +234,21 @@ export default function Files(props) {
                           <TableCell>{(row.size / 1000) + ' KB'}</TableCell>
                         </Hidden>
                         <TableCell align="right">
-                          <IconButton className={classes.button} aria-label="Print" onClick={() => handlePrintIconClick(row._id, row.originalname)}>
-                            <PrintIcon fontSize="small" />
-                          </IconButton>
-                          <IconButton className={classes.button} aria-label="Download">
-                            <SaveAltIcon fontSize="small" />
-                          </IconButton>
-                          <IconButton className={classes.button} onClick={() => handleDeleteClick(row)} aria-label="Delete">
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
+                          <Tooltip title="Print">
+                            <IconButton className={classes.button} aria-label="Print" onClick={() => handlePrintIconClick(row._id, row.originalname)}>
+                              <PrintIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Download">
+                            <IconButton className={classes.button} aria-label="Download">
+                              <SaveAltIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Delete">
+                            <IconButton className={classes.button} onClick={() => handleDeleteClick(row)} aria-label="Delete">
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -279,6 +291,8 @@ export default function Files(props) {
           <Snackbar 
             message={snackbarMessage.message} 
             variant={snackbarMessage.type}
+            printAction={snackbarMessage.printAction}
+            handlePrintNowClick={handlePrintNowClick}
             ref={snackbar} 
           />
 

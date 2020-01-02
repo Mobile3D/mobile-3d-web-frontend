@@ -41,7 +41,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default function ControlSettings() {
+export default function ControlSettings(props) {
   const classes = useStyles();
 
   const [fanState, setFanState] = useState(0);
@@ -52,11 +52,21 @@ export default function ControlSettings() {
 
   const handleFanState = (state) => {
     setFanState(state);
+
+    if (state === 0) {
+      props.socket.emit('fanOff');
+    } else {
+      props.socket.emit('fanOn', numFanSpeed);
+    }
+
   }
 
   const handleNumFanSpeedChange = (e) => {
     if (e.target.value > 0 && e.target.value <= 100) {
       setNumFanSpeed(e.target.value);
+      if (fanState === 1) {
+        props.socket.emit('fanOn', numFanSpeed);
+      }
     }
   }
 
@@ -67,12 +77,27 @@ export default function ControlSettings() {
   }
 
   const handleNumTemperatureChange = (e) => {
-
     if (e.target.value === '') {
       setNumFanSpeed(numFanSpeed);
     } else if (e.target.value >= 0 && e.target.value <= 200) {
       setNumTemperature(e.target.value);
     }
+  }
+
+  const handleExtrudeClick = () => {
+    props.socket.emit('extrude', numLength);
+  }
+
+  const handleRetractClick = () => {
+    props.socket.emit('retract', numLength);
+  }
+
+  const handleSetHeatbedClick = () => {
+    props.socket.emit('setHeatbedTemperature', numTemperature);
+  }
+
+  const handleSetHotendClick = () => {
+    props.socket.emit('setHotendTemperature', numTemperature);
   }
 
   return (
@@ -88,7 +113,7 @@ export default function ControlSettings() {
                 <TextField
                   id="fanSpeed"
                   className={classes.textField}
-                  label="Speed"
+                  label="Speed (%)"
                   variant="outlined"
                   type="number"
                   fullWidth
@@ -119,8 +144,8 @@ export default function ControlSettings() {
                   value={numLength}
                 />
               </div>
-              <div className={classes.settingsButton}><Button variant="contained" size="small" fullWidth>Extrude</Button></div>
-              <div><Button variant="contained" size="small" fullWidth>Retract</Button></div>
+              <div className={classes.settingsButton}><Button variant="contained" size="small" fullWidth onClick={handleExtrudeClick}>Extrude</Button></div>
+              <div><Button variant="contained" size="small" fullWidth onClick={handleRetractClick}>Retract</Button></div>
             </CardContent>
           </Card>
         </Grid>
@@ -142,8 +167,8 @@ export default function ControlSettings() {
                   value={numTemperature}
                 />
               </div>
-              <div className={classes.settingsButton}><Button variant="contained" size="small" fullWidth>Set Heatend</Button></div>
-              <div><Button variant="contained" size="small" fullWidth>Set Hotend</Button></div>
+              <div className={classes.settingsButton}><Button variant="contained" size="small" fullWidth onClick={handleSetHeatbedClick}>Set Heatbed</Button></div>
+              <div><Button variant="contained" size="small" fullWidth onClick={handleSetHotendClick}>Set Hotend</Button></div>
             </CardContent>
           </Card>
         </Grid>
