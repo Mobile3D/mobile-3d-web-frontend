@@ -37,7 +37,7 @@ const useStyles = makeStyles(theme => ({
 export default function AxisControls(props) {
   const classes = useStyles();
 
-  const [selectedLength, setSelectedLength] = useState(1);
+  const [selectedLength, setSelectedLength] = useState(10);
 
   const handleSelectedLengthClick = (b) => {
     setSelectedLength(b);

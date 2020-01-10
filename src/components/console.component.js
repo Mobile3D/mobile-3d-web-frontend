@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
@@ -49,6 +49,8 @@ export default function Console(props) {
   const [logCount, setLogCount] = useState(0);
   const [log, setLog] = useState([]);
 
+  const logBox = useRef();
+
   props.socket.on('printLog', (e) => {
     if (log[log.length - 1] !== e) {
       if (log.length > 20) log.shift();
@@ -62,6 +64,7 @@ export default function Console(props) {
       if (log.length > 20) log.shift();
       setLogCount(logCount + 1);
       setLog([...log, e]);
+      logBox.current.scrollTop = logBox.current.scrollHeight;
     }
   });
 
@@ -75,12 +78,18 @@ export default function Console(props) {
     }
   }
 
+  const handleEnterKeyDown = (e) => {
+    if (e.key === 'Enter' && txtCommand !== '') {
+      props.socket.emit('sendManualCommand', txtCommand);
+    }
+  }
+
   return (
     <div className={classes.root}>
       <Card className={classes.card}>
         <div className={classes.details}>
           <CardContent className={classes.content}>
-            <div className={classes.logBox}>
+            <div className={classes.logBox} ref={logBox}>
               { log.map(text => (
                 <span key={logCount}>{text}<br/></span>
               ))}
@@ -96,6 +105,7 @@ export default function Console(props) {
                   fullWidth
                   onChange={handleTxtCommandChange}
                   value={txtCommand}
+                  onKeyDown={handleEnterKeyDown}
                 />
               </Grid>  
               <Grid item sm={2} className={classes.gridItem}>

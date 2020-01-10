@@ -45,9 +45,9 @@ export default function ControlSettings(props) {
   const classes = useStyles();
 
   const [fanState, setFanState] = useState(0);
-  const [numFanSpeed, setNumFanSpeed] = useState(1);
-  const [numLength, setNumLength] = useState(1);
-  const [numTemperature, setNumTemperature] = useState(0);
+  const [numFanSpeed, setNumFanSpeed] = useState(null);
+  const [numLength, setNumLength] = useState(null);
+  const [numTemperature, setNumTemperature] = useState(null);
   
 
   const handleFanState = (state) => {
@@ -62,6 +62,10 @@ export default function ControlSettings(props) {
   }
 
   const handleNumFanSpeedChange = (e) => {
+    if (e.target.value === '') {
+      setNumFanSpeed(null);
+    }
+
     if (e.target.value > 0 && e.target.value <= 100) {
       setNumFanSpeed(e.target.value);
       if (fanState === 1) {
@@ -71,15 +75,19 @@ export default function ControlSettings(props) {
   }
 
   const handleNumLengthChange = (e) => {
-    if (e.target.value > 0 && e.target.value <= 100) {
+    if (e.target.value === '') {
+      setNumLength(null);
+    }
+
+    if (e.target.value > 0 && e.target.value <= 300) {
       setNumLength(e.target.value);
     }
   }
 
   const handleNumTemperatureChange = (e) => {
     if (e.target.value === '') {
-      setNumFanSpeed(numFanSpeed);
-    } else if (e.target.value >= 0 && e.target.value <= 200) {
+      setNumTemperature(null);
+    } else if (e.target.value >= 0 && e.target.value <= 300) {
       setNumTemperature(e.target.value);
     }
   }

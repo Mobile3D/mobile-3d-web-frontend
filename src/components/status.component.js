@@ -79,6 +79,18 @@ export default function Status(props) {
     //console.log(e);
   });
 
+  props.socket.on('newFileToPrint', (file) => {
+    window.sessionStorage.setItem('print_file_id', file.id);
+    window.sessionStorage.setItem('print_file_name', file.name);
+    setLoadedFile({id: file.id, name: file.name});
+  });
+
+  props.socket.on('deleteLoadedFile', () => {
+    window.sessionStorage.removeItem('print_file_id');
+    window.sessionStorage.removeItem('print_file_name');
+    setLoadedFile({id: null, name: null});
+  })
+
   props.socket.on('printStatus', (status) => {
     
     if (status !== printStatus) {
@@ -144,6 +156,7 @@ export default function Status(props) {
       id: null,
       name: null
     });
+    props.socket.emit('deleteLoadedFile');
   }
 
   if (!printerStatusPromiseResolved) {
@@ -190,7 +203,7 @@ export default function Status(props) {
               <PauseIcon />
             </IconButton> */}
 
-            { !printerStatus.connected || (printerStatus.ready && loadedFile.id !== null) ? (
+            { (!printerStatus.connected && loadedFile.id !== null) || (printerStatus.ready && loadedFile.id !== null) ? (
             <Tooltip title="Remove File">
               <span>
                 <IconButton className={classes.button} onClick={handleDeleteClick} aria-label="Delete">

@@ -23,6 +23,7 @@ import DeleteDialog from '../components/deletedialog.component';
 import UploadDialog from '../components/uploaddialog.component';
 import { uploadService } from '../services/uploads.service';
 import { checkResponse } from '../helpers/api.helper';
+import { filesHelper } from '../helpers/files.helper';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -183,8 +184,8 @@ export default function Files(props) {
   }
 
   const handlePrintIconClick = (id, name) => {
-    window.sessionStorage.setItem('print_file_id', id);
-    window.sessionStorage.setItem('print_file_name', name);
+    filesHelper.setNextFile(id, name);
+    props.socket.emit('loadFile', {id: id, name: name});
     setSnackbarMessage({
       type: 'info',
       message: '"' + name + '" is ready to be printed. You can make some adjustments in the control panel.',
