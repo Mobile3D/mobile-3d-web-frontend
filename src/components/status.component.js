@@ -15,6 +15,7 @@ import { Link } from 'react-router-dom';
 
 import { printerService } from '../services/printer.service';
 import Spinner from '../components/spinner.component';
+import ConfirmStopDialog from '../components/confirmstopdialog.component';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -53,6 +54,7 @@ export default function Status(props) {
   const [printerStatus, setPrinterStatus] = useState({});
   const [printStatus, setPrintStatus] = useState('');
   const [printerStatusPromiseResolved, setPrinterStatusPromiseResolved] = useState(false);
+  const [openConfirmStopDialog, setOpenConfirmStopDialog] = useState(false);
 
   useEffect(() => {
     printerService.getStatus().then((data) => {
@@ -72,6 +74,15 @@ export default function Status(props) {
   }
 
   const handleStopButtonClick = (e) => {
+    setOpenConfirmStopDialog(true);
+  }
+
+  const handleStopCancel = (e) => {
+    setOpenConfirmStopDialog(false);
+  }
+
+  const handleStopConfirm = (e) => {
+    setOpenConfirmStopDialog(false);
     props.socket.emit('cancelPrint');
   }
 
@@ -236,6 +247,15 @@ export default function Status(props) {
         />
         */}
       </Card>
+
+      <ConfirmStopDialog 
+        open={openConfirmStopDialog} 
+        itemName={loadedFile.name}
+        deleteType="file"
+        onCancelDelete={handleStopCancel} 
+        onConfirmDelete={handleStopConfirm} 
+      />
+
     </div>
   );
 }

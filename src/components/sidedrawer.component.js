@@ -78,7 +78,7 @@ export default function SideDrawer(props) {
           >
             <div className={classes.list}>
               <List>
-                <ListItem button>
+                <ListItem>
                   <ListItemAvatar>
                     <Avatar className={classes.pinkAvatar}>{user.firstname === undefined ? '' : user.firstname.substr(0, 1)}</Avatar>
                   </ListItemAvatar>
@@ -112,7 +112,7 @@ export default function SideDrawer(props) {
               <List>
                 <ListItem button onClick={handleDarkModeClick}>
                   <ListItemIcon>{themeContext.themeStyle === 'dark' ? (<NightsStayIcon/>) : (<NightsStayOutlinedIcon/>)}</ListItemIcon>
-                  <ListItemText primary="Dark Mode" />
+                  <ListItemText primary={themeContext.themeStyle === 'dark' ? 'Light Mode' : 'Dark Mode'} />
                 </ListItem>
               </List>
               <Divider/>

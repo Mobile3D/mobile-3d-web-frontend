@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
@@ -8,6 +8,8 @@ import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
 import KeyboardArrowLeftIcon from '@material-ui/icons/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
 import HomeIcon from '@material-ui/icons/Home';
+
+import { printerService } from '../services/printer.service';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -38,14 +40,39 @@ export default function AxisControls(props) {
   const classes = useStyles();
 
   const [selectedLength, setSelectedLength] = useState(10);
+  const [printerStatus, setPrinterStatus] = useState({});
+  const [printerStatusPromiseResolved, setPrinterStatusPromiseResolved] = useState(false);
 
   const handleSelectedLengthClick = (b) => {
     setSelectedLength(b);
   }
 
+  useEffect(() => {
+    printerService.getStatus().then((data) => {
+      setPrinterStatus(data);
+      setPrinterStatusPromiseResolved(true);
+    });
+  }, []);
+
   const handleMoveButtonClick = (direction) => {
     props.socket.emit(direction, selectedLength);
   }
+
+  props.socket.on('printStatus', (status) => {
+    if (status !== 'ready' && status !== 'connected') {
+      setPrinterStatus({
+        connected: printerStatus.connected,
+        ready: true,
+        busy: printerStatus.busy
+      });
+    } else {
+      setPrinterStatus({
+        connected: printerStatus.connected,
+        ready: true,
+        busy: printerStatus.busy
+      });
+    }
+  });
 
   return (
     <div className={classes.root}>
@@ -55,27 +82,27 @@ export default function AxisControls(props) {
         <Grid container item sm={6} spacing={1}>
           <Grid container item xs={12} spacing={1} justify="center">
             <Grid item xs={4}>
-              <Button variant="contained" className={classes.button} onClick={() => handleMoveButtonClick('moveForward')}>
+              <Button variant="contained" disabled={!printerStatusPromiseResolved || !printerStatus.ready} className={classes.button} onClick={() => handleMoveButtonClick('moveForward')}>
                 <KeyboardArrowUpIcon />
               </Button>
             </Grid>
           </Grid>
           <Grid container item xs={12} spacing={1} justify="center">
             <Grid item xs={false}>
-              <Button variant="contained" className={classes.button} onClick={() => handleMoveButtonClick('moveLeft')}>
+              <Button variant="contained" disabled={!printerStatusPromiseResolved || !printerStatus.ready} className={classes.button} onClick={() => handleMoveButtonClick('moveLeft')}>
                 <KeyboardArrowLeftIcon />
               </Button>
-              <Button variant="contained" className={classes.button} onClick={() => handleMoveButtonClick('moveXYHome')}>
+              <Button variant="contained" disabled={!printerStatusPromiseResolved || !printerStatus.ready} className={classes.button} onClick={() => handleMoveButtonClick('moveXYHome')}>
                 <HomeIcon />
               </Button>
-              <Button variant="contained" className={classes.button} onClick={() => handleMoveButtonClick('moveRight')}>
+              <Button variant="contained" disabled={!printerStatusPromiseResolved || !printerStatus.ready} className={classes.button} onClick={() => handleMoveButtonClick('moveRight')}>
                 <KeyboardArrowRightIcon />
               </Button>
             </Grid>
           </Grid>
           <Grid container item xs={12} spacing={1} justify="center">
             <Grid item xs={4}>
-              <Button variant="contained" className={classes.button} onClick={() => handleMoveButtonClick('moveBack')}>
+              <Button variant="contained" disabled={!printerStatusPromiseResolved || !printerStatus.ready} className={classes.button} onClick={() => handleMoveButtonClick('moveBack')}>
                 <KeyboardArrowDownIcon />
               </Button>
             </Grid>
@@ -86,21 +113,21 @@ export default function AxisControls(props) {
         <Grid container item spacing={1} sm={6}>
           <Grid container item xs={12} spacing={1} justify="center">
             <Grid item xs={4}>
-              <Button variant="contained" className={classes.button} onClick={() => handleMoveButtonClick('moveUp')}>
+              <Button variant="contained" disabled={!printerStatusPromiseResolved || !printerStatus.ready} className={classes.button} onClick={() => handleMoveButtonClick('moveUp')}>
                 <KeyboardArrowUpIcon />
               </Button>
             </Grid>
           </Grid>
           <Grid container item xs={12} spacing={1} justify="center">
             <Grid item xs={false}>
-              <Button variant="contained" className={classes.button} onClick={() => handleMoveButtonClick('moveZHome')}>
+              <Button variant="contained" disabled={!printerStatusPromiseResolved || !printerStatus.ready} className={classes.button} onClick={() => handleMoveButtonClick('moveZHome')}>
                 <HomeIcon />
               </Button>
             </Grid>
           </Grid>
           <Grid container item xs={12} spacing={1} justify="center">
             <Grid item xs={4}>
-              <Button variant="contained" className={classes.button} onClick={() => handleMoveButtonClick('moveDown')}>
+              <Button variant="contained" disabled={!printerStatusPromiseResolved || !printerStatus.ready} className={classes.button} onClick={() => handleMoveButtonClick('moveDown')}>
                 <KeyboardArrowDownIcon />
               </Button>
             </Grid>
@@ -113,6 +140,7 @@ export default function AxisControls(props) {
           size="large"
           variant="contained"
           aria-label="large contained button group"
+          disabled={!printerStatusPromiseResolved || !printerStatus.ready}
         >
           <Button color={ selectedLength === 1 ? 'primary' : 'default'} onClick={() => handleSelectedLengthClick(1)}>1mm</Button>
           <Button color={ selectedLength === 10 ? 'primary' : 'default'} onClick={() => handleSelectedLengthClick(10)}>10mm</Button>

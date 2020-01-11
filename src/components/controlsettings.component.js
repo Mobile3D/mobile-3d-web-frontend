@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
@@ -6,6 +6,8 @@ import Card from '@material-ui/core/Card';
 import TextField from '@material-ui/core/TextField';
 import CardContent from '@material-ui/core/CardContent';
 import Button from '@material-ui/core/Button';
+
+import { printerService } from '../services/printer.service';
 
 
 const useStyles = makeStyles(theme => ({
@@ -45,10 +47,18 @@ export default function ControlSettings(props) {
   const classes = useStyles();
 
   const [fanState, setFanState] = useState(0);
-  const [numFanSpeed, setNumFanSpeed] = useState(null);
-  const [numLength, setNumLength] = useState(null);
-  const [numTemperature, setNumTemperature] = useState(null);
-  
+  const [numFanSpeed, setNumFanSpeed] = useState('');
+  const [numLength, setNumLength] = useState('');
+  const [numTemperature, setNumTemperature] = useState('');
+  const [printerStatus, setPrinterStatus] = useState({});
+  const [printerStatusPromiseResolved, setPrinterStatusPromiseResolved] = useState(false);
+
+  useEffect(() => {
+    printerService.getStatus().then((data) => {
+      setPrinterStatus(data);
+      setPrinterStatusPromiseResolved(true);
+    });
+  }, []);
 
   const handleFanState = (state) => {
     setFanState(state);
@@ -76,7 +86,7 @@ export default function ControlSettings(props) {
 
   const handleNumLengthChange = (e) => {
     if (e.target.value === '') {
-      setNumLength(null);
+      setNumLength('');
     }
 
     if (e.target.value > 0 && e.target.value <= 300) {
@@ -86,7 +96,7 @@ export default function ControlSettings(props) {
 
   const handleNumTemperatureChange = (e) => {
     if (e.target.value === '') {
-      setNumTemperature(null);
+      setNumTemperature('');
     } else if (e.target.value >= 0 && e.target.value <= 300) {
       setNumTemperature(e.target.value);
     }
@@ -107,6 +117,22 @@ export default function ControlSettings(props) {
   const handleSetHotendClick = () => {
     props.socket.emit('setHotendTemperature', numTemperature);
   }
+
+  props.socket.on('printStatus', (status) => {
+    if (status !== 'ready' && status !== 'connected') {
+      setPrinterStatus({
+        connected: printerStatus.connected,
+        ready: false,
+        busy: printerStatus.busy
+      });
+    } else {
+      setPrinterStatus({
+        connected: printerStatus.connected,
+        ready: true,
+        busy: printerStatus.busy
+      });
+    }
+  });
 
   return (
     <div className={classes.root}>
@@ -150,10 +176,11 @@ export default function ControlSettings(props) {
                   fullWidth
                   onChange={handleNumLengthChange}
                   value={numLength}
+                  disabled={!printerStatusPromiseResolved || !printerStatus.ready}
                 />
               </div>
-              <div className={classes.settingsButton}><Button variant="contained" size="small" fullWidth onClick={handleExtrudeClick}>Extrude</Button></div>
-              <div><Button variant="contained" size="small" fullWidth onClick={handleRetractClick}>Retract</Button></div>
+              <div className={classes.settingsButton}><Button variant="contained" disabled={!printerStatusPromiseResolved || !printerStatus.ready} size="small" fullWidth onClick={handleExtrudeClick}>Extrude</Button></div>
+              <div><Button variant="contained" disabled={!printerStatusPromiseResolved || !printerStatus.ready} size="small" fullWidth onClick={handleRetractClick}>Retract</Button></div>
             </CardContent>
           </Card>
         </Grid>

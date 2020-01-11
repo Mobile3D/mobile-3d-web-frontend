@@ -46,26 +46,15 @@ export default function Console(props) {
   const classes = useStyles();
 
   const [txtCommand, setTxtCommand] = useState('');
-  const [logCount, setLogCount] = useState(0);
-  const [log, setLog] = useState([]);
+  const [logCount] = useState(0);
+  const [log] = useState([]);
 
   const logBox = useRef();
 
   props.socket.on('printLog', (e) => {
-    if (log[log.length - 1] !== e) {
-      if (log.length > 20) log.shift();
-      setLogCount(logCount + 1);
-      setLog([...log, e]);
-    }
-  });
-
-  props.socket.on('printStatus', (e) => {
-    if (log[log.length - 1] !== e) {
-      if (log.length > 20) log.shift();
-      setLogCount(logCount + 1);
-      setLog([...log, e]);
-      logBox.current.scrollTop = logBox.current.scrollHeight;
-    }
+    log.push(e);
+    console.log(log);
+    logBox.current.scrollTop = logBox.current.scrollHeight;
   });
 
   const handleTxtCommandChange = (e) => {
@@ -91,7 +80,7 @@ export default function Console(props) {
           <CardContent className={classes.content}>
             <div className={classes.logBox} ref={logBox}>
               { log.map(text => (
-                <span key={logCount}>{text}<br/></span>
+                <span>{text}<br/></span>
               ))}
             </div>
             <Grid container spacing={1} justify="center">
