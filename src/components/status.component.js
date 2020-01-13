@@ -12,10 +12,12 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import StopIcon from '@material-ui/icons/Stop';
 import Tooltip from '@material-ui/core/Tooltip';
 import { Link } from 'react-router-dom';
+import LinearProgress from '@material-ui/core/LinearProgress';
 
 import { printerService } from '../services/printer.service';
 import Spinner from '../components/spinner.component';
 import ConfirmStopDialog from '../components/confirmstopdialog.component';
+import { filesHelper } from '../helpers/files.helper';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -45,21 +47,37 @@ const useStyles = makeStyles(theme => ({
       color: '#0078d7',
     },
   },
+  progressbar: {
+    marginTop: theme.spacing(2),
+    marginBottom: theme.spacing(1),
+    marginLeft: theme.spacing(2),
+    marginRight: theme.spacing(2),
+  },
 }));
 
 export default function Status(props) {
   const classes = useStyles();
 
   const [loadedFile, setLoadedFile] = useState({ id: window.sessionStorage.getItem('print_file_id'), name: window.sessionStorage.getItem('print_file_name')});
+  const [loadedFilePromiseResolved, setLoadedFilePromiseResolved] = useState(false);
   const [printerStatus, setPrinterStatus] = useState({});
   const [printStatus, setPrintStatus] = useState('');
   const [printerStatusPromiseResolved, setPrinterStatusPromiseResolved] = useState(false);
   const [openConfirmStopDialog, setOpenConfirmStopDialog] = useState(false);
+  const [printProgress, setPrintProgress] = useState(0);
 
   useEffect(() => {
     printerService.getStatus().then((data) => {
       setPrinterStatus(data);
       setPrinterStatusPromiseResolved(true);
+    });
+
+    printerService.getLoadedFile().then((data) => {
+      if (data.id !== null || data.name !== null) {
+        setLoadedFile(data);
+        filesHelper.setNextFile(data.id, data.name);
+      }
+      setLoadedFilePromiseResolved(true);
     });
   }, []);
 
@@ -100,7 +118,15 @@ export default function Status(props) {
     window.sessionStorage.removeItem('print_file_id');
     window.sessionStorage.removeItem('print_file_name');
     setLoadedFile({id: null, name: null});
+    printerService.setLoadedFile({
+      id: null,
+      name: null
+    });
   })
+
+  props.socket.on('printProgress', (progress) => {
+    setPrintProgress((progress.sent/progress.total)*100);
+  });
 
   props.socket.on('printStatus', (status) => {
     
@@ -170,7 +196,7 @@ export default function Status(props) {
     props.socket.emit('deleteLoadedFile');
   }
 
-  if (!printerStatusPromiseResolved) {
+  if (!printerStatusPromiseResolved || !loadedFilePromiseResolved) {
     return (
       <div>
         <Spinner />
@@ -199,6 +225,14 @@ export default function Status(props) {
             <Typography variant="subtitle1" color={loadedFile.id !== null ? 'initial' : 'error'}>
               { !printerStatus.connected || loadedFile.id !== null ? loadedFile.name : 'No file loaded' }
             </Typography>
+           { printerStatus.connected && !printerStatus.ready && printStatus === 'printing' ? (
+              <div>
+                <LinearProgress className={classes.progressbar} variant="determinate" value={printProgress} />
+                <Typography variant="subtitle1">
+                  { printProgress + '%' }
+                </Typography>
+              </div>
+           ) : (<div></div>) }
             { !printerStatus.connected || loadedFile.id !== null ? (<div></div>): (
               <ButtonGroup className={classes.buttonGroup} color="primary" aria-label="outlined primary button group">
                 <Button>
