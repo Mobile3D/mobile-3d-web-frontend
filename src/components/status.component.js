@@ -64,7 +64,7 @@ export default function Status(props) {
   const [printStatus, setPrintStatus] = useState('');
   const [printerStatusPromiseResolved, setPrinterStatusPromiseResolved] = useState(false);
   const [openConfirmStopDialog, setOpenConfirmStopDialog] = useState(false);
-  const [printProgress, setPrintProgress] = useState(0);
+  const [printProgress, setPrintProgress] = useState(window.sessionStorage.getItem('print_progress_percentage') !== 0 ? window.sessionStorage.getItem('print_progress_percentage') : 0);
 
   useEffect(() => {
     printerService.getStatus().then((data) => {
@@ -126,6 +126,7 @@ export default function Status(props) {
 
   props.socket.on('printProgress', (progress) => {
     setPrintProgress((progress.sent/progress.total)*100);
+    window.sessionStorage.setItem('print_progress_percentage', (progress.sent/progress.total)*100);
   });
 
   props.socket.on('printStatus', (status) => {
@@ -163,6 +164,7 @@ export default function Status(props) {
       } else if (status === 'completed') {
         window.sessionStorage.removeItem('print_file_id');
         window.sessionStorage.removeItem('print_file_name');
+        window.sessionStorage.removeItem('print_progress_percentage');
         setLoadedFile({
           id: null,
           name: null
@@ -225,11 +227,11 @@ export default function Status(props) {
             <Typography variant="subtitle1" color={loadedFile.id !== null ? 'initial' : 'error'}>
               { !printerStatus.connected || loadedFile.id !== null ? loadedFile.name : 'No file loaded' }
             </Typography>
-           { printerStatus.connected && !printerStatus.ready && printStatus === 'printing' ? (
+           { printerStatus.connected && !printerStatus.ready ? (
               <div>
                 <LinearProgress className={classes.progressbar} variant="determinate" value={printProgress} />
                 <Typography variant="subtitle1">
-                  { printProgress + '%' }
+                  { Math.floor(printProgress) === 0 ? 'loading...' : Math.floor(printProgress) + '%' }
                 </Typography>
               </div>
            ) : (<div></div>) }

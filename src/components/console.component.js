@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
@@ -47,15 +47,19 @@ export default function Console(props) {
 
   const [txtCommand, setTxtCommand] = useState('');
   const [logCount] = useState(0);
-  const [log] = useState([]);
+  const [log, setLog] = useState([]);
 
   const logBox = useRef();
 
-  props.socket.on('printLog', (e) => {
-    log.push(e);
-    console.log(log);
-    logBox.current.scrollTop = logBox.current.scrollHeight;
-  });
+
+  useEffect(() => {
+    props.socket.on('printLog', (e) => {
+      log.push(e);
+      console.log(log);
+      setLog(log);
+      logBox.current.scrollTop = logBox.current.scrollHeight;
+    });
+  }, [props.socket, log]);
 
   const handleTxtCommandChange = (e) => {
     setTxtCommand(e.target.value);
