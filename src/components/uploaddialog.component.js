@@ -1,4 +1,4 @@
-import React, { forwardRef, useImperativeHandle, useState, useContext } from 'react';
+import React, { forwardRef, useImperativeHandle, useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
@@ -19,7 +19,7 @@ import { uploadService } from '../services/uploads.service';
 import { checkResponse } from '../helpers/api.helper';
 import { checkFile } from '../helpers/upload.helper';
 import { filesHelper } from '../helpers/files.helper';
-import { SocketContext } from '../contexts/socket.context';
+import { emitEvent } from '../services/socket.service';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -53,8 +53,6 @@ const UploadDialog = forwardRef((props, ref) => {
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState(null);
   const [uploadStarted, setUploadStarted] = useState(false);
-
-  const socket = useContext(SocketContext);
 
   useImperativeHandle(ref, () => ({
 
@@ -111,7 +109,7 @@ const UploadDialog = forwardRef((props, ref) => {
 
         if (responseCheck.valid) {
           filesHelper.setNextFile(data._id, data.originalname);
-          socket.emit('loadFile', {id: data._id, name: data.originalname});
+          emitEvent('loadFile', {id: data._id, name: data.originalname});
           props.onUploadFinish({
             type: 'success',
             message: 'File "' + data.originalname + '" successfully uploaded.'

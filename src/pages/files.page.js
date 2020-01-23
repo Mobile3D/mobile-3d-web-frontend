@@ -24,6 +24,7 @@ import UploadDialog from '../components/uploaddialog.component';
 import { uploadService } from '../services/uploads.service';
 import { checkResponse } from '../helpers/api.helper';
 import { filesHelper } from '../helpers/files.helper';
+import { emitEvent } from '../services/socket.service';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -185,7 +186,7 @@ export default function Files(props) {
 
   const handlePrintIconClick = (id, name) => {
     filesHelper.setNextFile(id, name);
-    props.socket.emit('loadFile', {id: id, name: name});
+    emitEvent('loadFile', {id: id, name: name});
     setSnackbarMessage({
       type: 'info',
       message: '"' + name + '" is ready to be printed. You can make some adjustments in the control panel.',
@@ -195,7 +196,7 @@ export default function Files(props) {
   }
 
   const handlePrintNowClick = () => {
-    props.socket.emit('printFile', window.sessionStorage.getItem('print_file_id'));
+    emitEvent('printFile', window.sessionStorage.getItem('print_file_id'));
   }
 
   return (

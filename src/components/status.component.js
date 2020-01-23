@@ -18,6 +18,7 @@ import { printerService } from '../services/printer.service';
 import Spinner from '../components/spinner.component';
 import ConfirmStopDialog from '../components/confirmstopdialog.component';
 import { filesHelper } from '../helpers/files.helper';
+import { subscribeToEvent, emitEvent, unsubscribeFromEvent } from '../services/socket.service';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -81,8 +82,101 @@ export default function Status(props) {
     });
   }, []);
 
+  useEffect(() => {
+
+    subscribeToEvent('newFileToPrint', (file) => {
+      window.sessionStorage.setItem('print_file_id', file.id);
+      window.sessionStorage.setItem('print_file_name', file.name);
+      setLoadedFile({id: file.id, name: file.name});
+    });
+
+    subscribeToEvent('deleteLoadedFile', () => {
+      window.sessionStorage.removeItem('print_file_id');
+      window.sessionStorage.removeItem('print_file_name');
+      setLoadedFile({id: null, name: null});
+      printerService.setLoadedFile({
+        id: null,
+        name: null
+      });
+    });
+
+    subscribeToEvent('printProgress', (progress) => {
+      setPrintProgress((progress.sent/progress.total)*100);
+      window.sessionStorage.setItem('print_progress_percentage', (progress.sent/progress.total)*100);
+    });
+
+    return () => {
+      unsubscribeFromEvent('newFileToPrint');
+      unsubscribeFromEvent('deleteLoadedFile');
+      unsubscribeFromEvent('printProgress');
+    }
+
+  }, []);
+
+  useEffect(() => {
+    subscribeToEvent('printStatus', (status) => {
+      console.log(status);
+      if (status !== printStatus) {
+        setPrintStatus(status);
+        if (status === 'connected') {
+          setPrinterStatus({
+            connected: true,
+            ready: true,
+            busy: printerStatus.busy,
+            connecting: false
+          });
+        } else if (status === 'connecting') {
+          setPrinterStatus({
+            connected: printerStatus.connected,
+            ready: printerStatus.ready,
+            busy: printerStatus.busy,
+            connecting: true
+          });
+        } else if (status === 'ready') {
+          setPrinterStatus({
+            connected: printerStatus.connected,
+            ready: true,
+            busy: printerStatus.busy,
+            connecting: false
+          });
+        } else if (status === 'printing') {
+          setPrinterStatus({
+            connected: printerStatus.connected,
+            ready: false,
+            busy: printerStatus.busy,
+            connecting: false
+          });
+        } else if (status === 'completed') {
+          window.sessionStorage.removeItem('print_file_id');
+          window.sessionStorage.removeItem('print_file_name');
+          window.sessionStorage.removeItem('print_progress_percentage');
+          setLoadedFile({
+            id: null,
+            name: null
+          });
+        } else if (status === 'stopped') {
+          setPrinterStatus({
+            connected: printerStatus.connected,
+            ready: true,
+            busy: printerStatus.busy,
+            connecting: false
+          });
+        } else if (status === 'disconnected') {
+          setPrinterStatus({
+            connected: false,
+            ready: false,
+            busy: printerStatus.busy,
+            connecting: false
+          });
+        }
+      }
+  
+    });
+
+  }, [printStatus, printerStatus]);
+
   const handlePlayButtonClick = (e) => {
-    props.socket.emit('printFile', window.sessionStorage.getItem('print_file_id'));
+    emitEvent('printFile', window.sessionStorage.getItem('print_file_id'));
     setPrinterStatus({
       connected: printerStatus.connected,
       ready: false,
@@ -101,92 +195,8 @@ export default function Status(props) {
 
   const handleStopConfirm = (e) => {
     setOpenConfirmStopDialog(false);
-    props.socket.emit('cancelPrint');
+    emitEvent('cancelPrint');
   }
-
-  props.socket.on('printLog', (e) => {
-    //console.log(e);
-  });
-
-  props.socket.on('newFileToPrint', (file) => {
-    window.sessionStorage.setItem('print_file_id', file.id);
-    window.sessionStorage.setItem('print_file_name', file.name);
-    setLoadedFile({id: file.id, name: file.name});
-  });
-
-  props.socket.on('deleteLoadedFile', () => {
-    window.sessionStorage.removeItem('print_file_id');
-    window.sessionStorage.removeItem('print_file_name');
-    setLoadedFile({id: null, name: null});
-    printerService.setLoadedFile({
-      id: null,
-      name: null
-    });
-  })
-
-  props.socket.on('printProgress', (progress) => {
-    setPrintProgress((progress.sent/progress.total)*100);
-    window.sessionStorage.setItem('print_progress_percentage', (progress.sent/progress.total)*100);
-  });
-
-  props.socket.on('printStatus', (status) => {
-    
-    if (status !== printStatus) {
-      setPrintStatus(status);
-      if (status === 'connected') {
-        setPrinterStatus({
-          connected: true,
-          ready: true,
-          busy: printerStatus.busy,
-          connecting: false
-        });
-      } else if (status === 'connecting') {
-        setPrinterStatus({
-          connected: printerStatus.connected,
-          ready: printerStatus.ready,
-          busy: printerStatus.busy,
-          connecting: true
-        });
-      } else if (status === 'ready') {
-        setPrinterStatus({
-          connected: printerStatus.connected,
-          ready: true,
-          busy: printerStatus.busy,
-          connecting: false
-        });
-      } else if (status === 'printing') {
-        setPrinterStatus({
-          connected: printerStatus.connected,
-          ready: false,
-          busy: printerStatus.busy,
-          connecting: false
-        });
-      } else if (status === 'completed') {
-        window.sessionStorage.removeItem('print_file_id');
-        window.sessionStorage.removeItem('print_file_name');
-        window.sessionStorage.removeItem('print_progress_percentage');
-        setLoadedFile({
-          id: null,
-          name: null
-        });
-      } else if (status === 'stopped') {
-        setPrinterStatus({
-          connected: printerStatus.connected,
-          ready: true,
-          busy: printerStatus.busy,
-          connecting: false
-        });
-      } else if (status === 'disconnected') {
-        setPrinterStatus({
-          connected: false,
-          ready: false,
-          busy: printerStatus.busy,
-          connecting: false
-        });
-      }
-    }
-
-  });
 
   const handleDeleteClick = () => {
     window.sessionStorage.removeItem('print_file_id');
@@ -195,7 +205,7 @@ export default function Status(props) {
       id: null,
       name: null
     });
-    props.socket.emit('deleteLoadedFile');
+    emitEvent('deleteLoadedFile');
   }
 
   if (!printerStatusPromiseResolved || !loadedFilePromiseResolved) {
@@ -229,7 +239,7 @@ export default function Status(props) {
             </Typography>
            { printerStatus.connected && !printerStatus.ready ? (
               <div>
-                <LinearProgress className={classes.progressbar} variant="determinate" value={printProgress} />
+                <LinearProgress className={classes.progressbar} variant="determinate" value={parseInt(printProgress)} />
                 <Typography variant="subtitle1">
                   { Math.floor(printProgress) === 0 ? 'loading...' : Math.floor(printProgress) + '%' }
                 </Typography>

@@ -10,6 +10,7 @@ import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
 import HomeIcon from '@material-ui/icons/Home';
 
 import { printerService } from '../services/printer.service';
+import { subscribeToEvent, unsubscribeFromEvent, emitEvent } from '../services/socket.service';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -54,25 +55,32 @@ export default function AxisControls(props) {
     });
   }, []);
 
-  const handleMoveButtonClick = (direction) => {
-    props.socket.emit(direction, selectedLength);
-  }
+  useEffect(() => {
+    subscribeToEvent('printStatus', (status) => {
+      if (status !== 'ready' && status !== 'connected') {
+        setPrinterStatus({
+          connected: printerStatus.connected,
+          ready: false,
+          busy: printerStatus.busy
+        });
+      } else {
+        setPrinterStatus({
+          connected: printerStatus.connected,
+          ready: true,
+          busy: printerStatus.busy
+        });
+      }
+    });
 
-  props.socket.on('printStatus', (status) => {
-    if (status !== 'ready' && status !== 'connected') {
-      setPrinterStatus({
-        connected: printerStatus.connected,
-        ready: true,
-        busy: printerStatus.busy
-      });
-    } else {
-      setPrinterStatus({
-        connected: printerStatus.connected,
-        ready: true,
-        busy: printerStatus.busy
-      });
+    return () => {
+      unsubscribeFromEvent('printStatus');
     }
-  });
+
+  })
+
+  const handleMoveButtonClick = (direction) => {
+    emitEvent(direction, selectedLength);
+  }
 
   return (
     <div className={classes.root}>

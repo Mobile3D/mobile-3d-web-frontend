@@ -6,6 +6,8 @@ import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
 
+import { subscribeToEvent, emitEvent, unsubscribeFromEvent } from '../services/socket.service';
+
 const useStyles = makeStyles(theme => ({
   root: {
     width: 800,
@@ -46,34 +48,44 @@ export default function Console(props) {
   const classes = useStyles();
 
   const [txtCommand, setTxtCommand] = useState('');
-  const [logCount] = useState(0);
   const [log, setLog] = useState([]);
 
   const logBox = useRef();
 
 
   useEffect(() => {
-    props.socket.on('printLog', (e) => {
-      log.push(e);
-      console.log(log);
-      setLog(log);
+    subscribeToEvent('printConsoleLog', (consoleLog) => {
+
+      const consoleLogWithId = [];
+
+      for(let i = 0; i < consoleLog.length; i++) {
+        consoleLogWithId.push({id: i, text: consoleLog[i]});
+      }
+
+      setLog(consoleLogWithId);
       logBox.current.scrollTop = logBox.current.scrollHeight;
     });
-  }, [props.socket, log]);
+
+    return () => {
+      unsubscribeFromEvent('printConsoleLog');
+    }
+
+  }, []);
 
   const handleTxtCommandChange = (e) => {
     setTxtCommand(e.target.value);
   }
 
+
   const handleBtnSendClick = (e) => {
     if (txtCommand !== '') {
-      props.socket.emit('sendManualCommand', txtCommand);
+      emitEvent('sendManualCommand', txtCommand);
     }
   }
 
   const handleEnterKeyDown = (e) => {
     if (e.key === 'Enter' && txtCommand !== '') {
-      props.socket.emit('sendManualCommand', txtCommand);
+      emitEvent('sendManualCommand', txtCommand);
     }
   }
 
@@ -83,8 +95,8 @@ export default function Console(props) {
         <div className={classes.details}>
           <CardContent className={classes.content}>
             <div className={classes.logBox} ref={logBox}>
-              { log.map(text => (
-                <span>{text}<br/></span>
+              { log.map(cLog => (
+                <span key={cLog.id}>{cLog.text}<br/></span>
               ))}
             </div>
             <Grid container spacing={1} justify="center">

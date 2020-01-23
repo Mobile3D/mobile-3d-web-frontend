@@ -18,7 +18,6 @@ import { userService } from './services/users.service';
 import { printerService } from './services/printer.service';
 import { UserContext } from './contexts/user.context';
 import { PrinterContext } from './contexts/printer.context';
-import { SocketContext } from './contexts/socket.context';
 import { ThemeContext } from './contexts/theme.context';
 import PrinterSettings from './pages/printersettings.page';
 
@@ -129,60 +128,54 @@ function App() {
                 <CssBaseline />
 
                 { authorized ? (
-                  <div>  
-                    <SocketContext.Consumer>
-                      { socket => (
-                        
-                        <UserContext.Consumer>
-                          {user => (
-                            <PrinterContext.Consumer>
-                              
-                              {printer => (
-                                <div>
-                                  <Route exact path="/" render={ props => (                        
-                                    <Home user={user} socket={socket} printer={printer} />        
-                                  )} />
-      
-                                  <Route exact path="/controls" render={ props => (
-                                    <Controls socket={socket} printer={printer} />
-                                  )} />
-      
-                                  <Route exact path="/files" render={ props => (
-                                    <Files socket={socket} />
-                                  )} />
-      
-                                  <Route exact path="/settings" render={ props => (
-                                    <Settings />
-                                  )} />
-      
-                                  <Route exact path="/settings/connection" render={ props => (
-                                    <ConnectionSettings />
-                                  )} />
-      
-                                  <Route exact path="/settings/printer" render={ props => (
-                                    <PrinterSettings />
-                                  )} />
-      
-                                  <Route exact path="/settings/accounts" render={ props => (
-                                    <AccountSettings {...props} />
-                                  )} />
-      
-                                  <Route exact path="/settings/accounts/add" render={ props => (
-                                    <AddAccount {...props} />
-                                  )} />
+                  <div>                          
+                    <UserContext.Consumer>
+                      {user => (
+                        <PrinterContext.Consumer>
+                          
+                          {printer => (
+                            <div>
+                              <Route exact path="/" render={ props => (                        
+                                <Home user={user} printer={printer} />        
+                              )} />
+  
+                              <Route exact path="/controls" render={ props => (
+                                <Controls printer={printer} />
+                              )} />
+  
+                              <Route exact path="/files" render={ props => (
+                                <Files />
+                              )} />
+  
+                              <Route exact path="/settings" render={ props => (
+                                <Settings />
+                              )} />
+  
+                              <Route exact path="/settings/connection" render={ props => (
+                                <ConnectionSettings />
+                              )} />
+  
+                              <Route exact path="/settings/printer" render={ props => (
+                                <PrinterSettings />
+                              )} />
+  
+                              <Route exact path="/settings/accounts" render={ props => (
+                                <AccountSettings {...props} />
+                              )} />
+  
+                              <Route exact path="/settings/accounts/add" render={ props => (
+                                <AddAccount {...props} />
+                              )} />
 
-                                  <Route exact path="/settings/info" render={ props => (
-                                    <Info {...props} />
-                                  )} />
-                                </div>
-                              )}
-
-                            </PrinterContext.Consumer> 
+                              <Route exact path="/settings/info" render={ props => (
+                                <Info {...props} />
+                              )} />
+                            </div>
                           )}
-                        </UserContext.Consumer>
-                      )}
-                    </SocketContext.Consumer>
 
+                        </PrinterContext.Consumer> 
+                      )}
+                    </UserContext.Consumer>
                   </div>
                 ) : (<RedirectToLogin />)
                 }

@@ -8,6 +8,7 @@ import CardContent from '@material-ui/core/CardContent';
 import Button from '@material-ui/core/Button';
 
 import { printerService } from '../services/printer.service';
+import { subscribeToEvent, emitEvent } from '../services/socket.service';
 
 
 const useStyles = makeStyles(theme => ({
@@ -60,13 +61,32 @@ export default function ControlSettings(props) {
     });
   }, []);
 
+  useEffect(() => {
+    subscribeToEvent('printStatus', (status) => {
+      if (status !== 'ready' && status !== 'connected') {
+        setPrinterStatus({
+          connected: printerStatus.connected,
+          ready: false,
+          busy: printerStatus.busy
+        });
+      } else {
+        setPrinterStatus({
+          connected: printerStatus.connected,
+          ready: true,
+          busy: printerStatus.busy
+        });
+      }
+    });
+
+  }, [printerStatus]);
+
   const handleFanState = (state) => {
     setFanState(state);
 
     if (state === 0) {
-      props.socket.emit('fanOff');
+      emitEvent('fanOff');
     } else {
-      props.socket.emit('fanOn', numFanSpeed);
+      emitEvent('fanOn', numFanSpeed);
     }
 
   }
@@ -79,7 +99,7 @@ export default function ControlSettings(props) {
     if (e.target.value > 0 && e.target.value <= 100) {
       setNumFanSpeed(e.target.value);
       if (fanState === 1) {
-        props.socket.emit('fanOn', numFanSpeed);
+        emitEvent('fanOn', numFanSpeed);
       }
     }
   }
@@ -103,36 +123,20 @@ export default function ControlSettings(props) {
   }
 
   const handleExtrudeClick = () => {
-    props.socket.emit('extrude', numLength);
+    emitEvent('extrude', numLength);
   }
 
   const handleRetractClick = () => {
-    props.socket.emit('retract', numLength);
+    emitEvent('retract', numLength);
   }
 
   const handleSetHeatbedClick = () => {
-    props.socket.emit('setHeatbedTemperature', numTemperature);
+    emitEvent('setHeatbedTemperature', numTemperature);
   }
 
   const handleSetHotendClick = () => {
-    props.socket.emit('setHotendTemperature', numTemperature);
+    emitEvent('setHotendTemperature', numTemperature);
   }
-
-  props.socket.on('printStatus', (status) => {
-    if (status !== 'ready' && status !== 'connected') {
-      setPrinterStatus({
-        connected: printerStatus.connected,
-        ready: false,
-        busy: printerStatus.busy
-      });
-    } else {
-      setPrinterStatus({
-        connected: printerStatus.connected,
-        ready: true,
-        busy: printerStatus.busy
-      });
-    }
-  });
 
   return (
     <div className={classes.root}>

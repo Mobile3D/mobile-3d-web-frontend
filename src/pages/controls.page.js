@@ -69,7 +69,7 @@ export default function Controls(props) {
           <Grid item xs={12}>
             <Grid container className={classes.options} justify="center" spacing={4}>
               <Grid item>
-                <Status printer={props.printer} socket={props.socket} />
+                <Status printer={props.printer} />
               </Grid>
             </Grid>
           </Grid>
@@ -81,13 +81,13 @@ export default function Controls(props) {
             <ListItemText primary="Console" secondary="Watch the log and send manual commands" />
             {openConsole ? <ExpandLess /> : <ExpandMore />}
           </ListItem>
-          <Collapse in={openConsole} timeout="auto" unmountOnExit>
+          <Collapse in={openConsole} timeout="auto">
             <div className={classes.controlWindow}>
               <Grid container className={classes.root} spacing={4}>
                 <Grid item xs={12}>
                   <Grid container className={classes.options} justify="center" spacing={4}>
                     <Grid item>
-                      <Console socket={props.socket} />
+                      <Console />
                     </Grid>
                   </Grid>
                 </Grid>
@@ -101,7 +101,7 @@ export default function Controls(props) {
           </ListItem>
           <Collapse in={openControlSettings} timeout="auto" unmountOnExit>
             <div className={classes.controlWindow}>
-              <ControlSettings socket={props.socket} />
+              <ControlSettings />
             </div>
           </Collapse>
           <Divider/>
@@ -111,7 +111,7 @@ export default function Controls(props) {
           </ListItem>
           <Collapse in={openAxisControls} timeout="auto" unmountOnExit>
             <div className={classes.controlWindow}>
-              <AxisControls socket={props.socket} />
+              <AxisControls />
             </div>
           </Collapse>
           <Divider/>
