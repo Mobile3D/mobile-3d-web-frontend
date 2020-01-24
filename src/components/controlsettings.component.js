@@ -8,7 +8,7 @@ import CardContent from '@material-ui/core/CardContent';
 import Button from '@material-ui/core/Button';
 
 import { printerService } from '../services/printer.service';
-import { subscribeToEvent, emitEvent } from '../services/socket.service';
+import { subscribeToEvent, emitEvent, unsubscribeFromEvent } from '../services/socket.service';
 
 
 const useStyles = makeStyles(theme => ({
@@ -65,20 +65,22 @@ export default function ControlSettings(props) {
     subscribeToEvent('printStatus', (status) => {
       if (status !== 'ready' && status !== 'connected') {
         setPrinterStatus({
-          connected: printerStatus.connected,
-          ready: false,
-          busy: printerStatus.busy
+          connected: false,
+          ready: false
         });
       } else {
         setPrinterStatus({
-          connected: printerStatus.connected,
-          ready: true,
-          busy: printerStatus.busy
+          connected: true,
+          ready: true
         });
       }
     });
 
-  }, [printerStatus]);
+    return () => {
+      unsubscribeFromEvent('printStatus');
+    }
+
+  }, []);
 
   const handleFanState = (state) => {
     setFanState(state);
@@ -157,10 +159,11 @@ export default function ControlSettings(props) {
                   fullWidth
                   onChange={handleNumFanSpeedChange}
                   value={numFanSpeed}
+                  disabled={!printerStatusPromiseResolved || !printerStatus.connected}
                 />
               </div>
-              <div className={classes.settingsButton}><Button variant="contained" size="small" color={ fanState === 1 ? 'primary' : 'default'} onClick={() => handleFanState(1)} fullWidth>On</Button></div>
-              <div><Button variant="contained" size="small" color={ fanState === 0 ? 'primary' : 'default'} onClick={() => handleFanState(0)} fullWidth>Off</Button></div>
+              <div className={classes.settingsButton}><Button variant="contained" size="small" color={ fanState === 1 ? 'primary' : 'default'} onClick={() => handleFanState(1)} fullWidth disabled={!printerStatusPromiseResolved || !printerStatus.connected}>On</Button></div>
+              <div><Button variant="contained" size="small" color={ fanState === 0 ? 'primary' : 'default'} onClick={() => handleFanState(0)} fullWidth disabled={!printerStatusPromiseResolved || !printerStatus.connected}>Off</Button></div>
             </CardContent>
           </Card>
         </Grid>
@@ -204,10 +207,11 @@ export default function ControlSettings(props) {
                   fullWidth
                   onChange={handleNumTemperatureChange}
                   value={numTemperature}
+                  disabled={!printerStatusPromiseResolved || !printerStatus.connected}
                 />
               </div>
-              <div className={classes.settingsButton}><Button variant="contained" size="small" fullWidth onClick={handleSetHeatbedClick}>Set Heatbed</Button></div>
-              <div><Button variant="contained" size="small" fullWidth onClick={handleSetHotendClick}>Set Hotend</Button></div>
+              <div className={classes.settingsButton}><Button variant="contained" size="small" fullWidth onClick={handleSetHeatbedClick} disabled={!printerStatusPromiseResolved || !printerStatus.connected}>Set Heatbed</Button></div>
+              <div><Button variant="contained" size="small" fullWidth onClick={handleSetHotendClick} disabled={!printerStatusPromiseResolved || !printerStatus.connected}>Set Hotend</Button></div>
             </CardContent>
           </Card>
         </Grid>

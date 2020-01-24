@@ -22,7 +22,7 @@ import Spinner from '../components/spinner.component';
 import DeleteDialog from '../components/deletedialog.component';
 import UploadDialog from '../components/uploaddialog.component';
 import { uploadService } from '../services/uploads.service';
-import { checkResponse } from '../helpers/api.helper';
+import { checkResponse, apiHelper } from '../helpers/api.helper';
 import { filesHelper } from '../helpers/files.helper';
 import { emitEvent } from '../services/socket.service';
 
@@ -101,7 +101,11 @@ export default function Files(props) {
   const uploadField = useRef();
 
   useEffect(() => {
+    
     loadFiles();
+
+    
+
   }, []);
 
   const loadFiles = () => {
@@ -128,22 +132,30 @@ export default function Files(props) {
 
   const handleDeleteConfirm = () => {
     setOpenDeleteDialog(false);
+    
+    if (parseInt(deleteItemId) !== parseInt(window.sessionStorage.getItem('print_file_id'))) {
+      uploadService.remove(deleteItemId).then((data) => {
 
-    uploadService.remove(deleteItemId).then((data) => {
+        const responseCheck = checkResponse(data);
 
-      const responseCheck = checkResponse(data);
+        if (responseCheck.valid) {
+          loadFiles();
+        } else {
+          setSnackbarMessage({
+            type: responseCheck.type,
+            message: responseCheck.message,
+          });
+          snackbar.current.handleOpen();
+        }
 
-      if (responseCheck.valid) {
-        loadFiles();
-      } else {
-        setSnackbarMessage({
-          type: responseCheck.type,
-          message: responseCheck.message,
-        });
-        snackbar.current.handleOpen();
-      }
-
-    });
+      });
+    } else {
+      setSnackbarMessage({
+        type: 'error',
+        message: 'A file cannot be deleted while it\'s in the queue.',
+      });
+      snackbar.current.handleOpen();
+    }
 
   }
 
@@ -195,6 +207,10 @@ export default function Files(props) {
     snackbar.current.handleOpen();
   }
 
+  const handleDownloadIconClick = (id, filename) => {
+    window.open(apiHelper.getFileUrl() + '/' + filename);
+  }
+
   const handlePrintNowClick = () => {
     emitEvent('printFile', window.sessionStorage.getItem('print_file_id'));
   }
@@ -242,7 +258,7 @@ export default function Files(props) {
                             </IconButton>
                           </Tooltip>
                           <Tooltip title="Download">
-                            <IconButton className={classes.button} aria-label="Download">
+                            <IconButton className={classes.button} onClick={() => handleDownloadIconClick(row._id, row.filename)} aria-label="Download">
                               <SaveAltIcon fontSize="small" />
                             </IconButton>
                           </Tooltip>

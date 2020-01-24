@@ -100,6 +100,57 @@ export default function Status(props) {
       });
     });
 
+    subscribeToEvent('printStatus', (status) => {
+      console.log(status);
+      setPrintStatus(status);
+      if (status === 'connected') {
+        setPrinterStatus({
+          connected: true,
+          ready: true,
+          connecting: false
+        });
+      } else if (status === 'connecting') {
+        setPrinterStatus({
+          connected: false,
+          ready: false,
+          connecting: true
+        });
+      } else if (status === 'ready') {
+        setPrinterStatus({
+          connected: true,
+          ready: true,
+          connecting: false
+        });
+      } else if (status === 'printing') {
+        setPrinterStatus({
+          connected: true,
+          ready: false,
+          connecting: false
+        });
+      } else if (status === 'completed') {
+        window.sessionStorage.removeItem('print_file_id');
+        window.sessionStorage.removeItem('print_file_name');
+        window.sessionStorage.removeItem('print_progress_percentage');
+        setLoadedFile({
+          id: null,
+          name: null
+        });
+      } else if (status === 'stopped') {
+        setPrinterStatus({
+          connected: true,
+          ready: true,
+          connecting: false
+        });
+      } else if (status === 'disconnected') {
+        setPrinterStatus({
+          connected: false,
+          ready: false,
+          connecting: false
+        });
+      }
+  
+    });
+
     subscribeToEvent('printProgress', (progress) => {
       setPrintProgress((progress.sent/progress.total)*100);
       window.sessionStorage.setItem('print_progress_percentage', (progress.sent/progress.total)*100);
@@ -108,72 +159,11 @@ export default function Status(props) {
     return () => {
       unsubscribeFromEvent('newFileToPrint');
       unsubscribeFromEvent('deleteLoadedFile');
+      unsubscribeFromEvent('printStatus');
       unsubscribeFromEvent('printProgress');
     }
 
   }, []);
-
-  useEffect(() => {
-    subscribeToEvent('printStatus', (status) => {
-      console.log(status);
-      if (status !== printStatus) {
-        setPrintStatus(status);
-        if (status === 'connected') {
-          setPrinterStatus({
-            connected: true,
-            ready: true,
-            busy: printerStatus.busy,
-            connecting: false
-          });
-        } else if (status === 'connecting') {
-          setPrinterStatus({
-            connected: printerStatus.connected,
-            ready: printerStatus.ready,
-            busy: printerStatus.busy,
-            connecting: true
-          });
-        } else if (status === 'ready') {
-          setPrinterStatus({
-            connected: printerStatus.connected,
-            ready: true,
-            busy: printerStatus.busy,
-            connecting: false
-          });
-        } else if (status === 'printing') {
-          setPrinterStatus({
-            connected: printerStatus.connected,
-            ready: false,
-            busy: printerStatus.busy,
-            connecting: false
-          });
-        } else if (status === 'completed') {
-          window.sessionStorage.removeItem('print_file_id');
-          window.sessionStorage.removeItem('print_file_name');
-          window.sessionStorage.removeItem('print_progress_percentage');
-          setLoadedFile({
-            id: null,
-            name: null
-          });
-        } else if (status === 'stopped') {
-          setPrinterStatus({
-            connected: printerStatus.connected,
-            ready: true,
-            busy: printerStatus.busy,
-            connecting: false
-          });
-        } else if (status === 'disconnected') {
-          setPrinterStatus({
-            connected: false,
-            ready: false,
-            busy: printerStatus.busy,
-            connecting: false
-          });
-        }
-      }
-  
-    });
-
-  }, [printStatus, printerStatus]);
 
   const handlePlayButtonClick = (e) => {
     emitEvent('printFile', window.sessionStorage.getItem('print_file_id'));

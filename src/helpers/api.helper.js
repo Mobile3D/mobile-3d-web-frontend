@@ -1,5 +1,6 @@
 export const apiHelper = {
   getUrl,
+  getFileUrl,
   getDefaultHeaders,
   getHeaders,
   getFileUploadHeaders,
@@ -9,6 +10,10 @@ export const apiHelper = {
 
 function getUrl() {
   return 'http://' + window.location.host.split(':')[0] + ':4000/api/v1';
+}
+
+function getFileUrl() {
+  return 'http://' + window.location.host.split(':')[0] + ':4000/files';
 }
 
 function getDefaultHeaders() {

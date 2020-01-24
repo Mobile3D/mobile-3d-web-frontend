@@ -7,6 +7,7 @@ import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
 
 import { subscribeToEvent, emitEvent, unsubscribeFromEvent } from '../services/socket.service';
+import { printerService } from '../services/printer.service';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -49,9 +50,17 @@ export default function Console(props) {
 
   const [txtCommand, setTxtCommand] = useState('');
   const [log, setLog] = useState([]);
+  const [printerStatus, setPrinterStatus] = useState({});
+  const [printerStatusPromiseResolved, setPrinterStatusPromiseResolved] = useState(false);
 
   const logBox = useRef();
 
+  useEffect(() => {
+    printerService.getStatus().then((data) => {
+      setPrinterStatus(data);
+      setPrinterStatusPromiseResolved(true);
+    });
+  }, []);
 
   useEffect(() => {
     subscribeToEvent('printConsoleLog', (consoleLog) => {
@@ -66,8 +75,23 @@ export default function Console(props) {
       logBox.current.scrollTop = logBox.current.scrollHeight;
     });
 
+    subscribeToEvent('printStatus', (status) => {
+      if (status !== 'ready' && status !== 'connected') {
+        setPrinterStatus({
+          connected: false,
+          ready: false
+        });
+      } else {
+        setPrinterStatus({
+          connected: true,
+          ready: true
+        });
+      }
+    });
+
     return () => {
       unsubscribeFromEvent('printConsoleLog');
+      unsubscribeFromEvent('printStatus');
     }
 
   }, []);
@@ -111,10 +135,11 @@ export default function Console(props) {
                   onChange={handleTxtCommandChange}
                   value={txtCommand}
                   onKeyDown={handleEnterKeyDown}
+                  disabled={!printerStatusPromiseResolved || !printerStatus.connected}
                 />
               </Grid>  
               <Grid item sm={2} className={classes.gridItem}>
-                <Button className={classes.button} variant="contained" color="primary" fullWidth onClick={handleBtnSendClick}>Send</Button>
+                <Button className={classes.button} variant="contained" color="primary" fullWidth onClick={handleBtnSendClick} disabled={!printerStatusPromiseResolved || !printerStatus.connected}>Send</Button>
               </Grid>            
             </Grid>            
           </CardContent>
