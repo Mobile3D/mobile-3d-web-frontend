@@ -6,12 +6,17 @@ import Paper from '@material-ui/core/Paper';
 import FormControl from '@material-ui/core/FormControl';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
+import InputLabel from '@material-ui/core/InputLabel';
 import validator from 'validator';
 
 import Dashboard from '../components/dashboard.component';
 import Snackbar from '../components/snackbar.component';
 import { connectionService } from '../services/connection.service';
 import { checkResponse } from '../helpers/api.helper';
+import Spinner from '../components/spinner.component';
+import { useInterval } from '../hooks/interval.hook';
 
 const useStyles = makeStyles(theme => ({
   main: {
@@ -72,12 +77,10 @@ export default function ConnectionSettings() {
   const classes = useStyles();
   const snackbar = useRef();
 
-  const [txtPort, setTxtPort] = useState('');
+  const [availablePorts, setAvailablePorts] = useState([]);
+  const [selPort, setSelPort] = useState('');
+  const [selPortOpen, setSelPortOpen] = useState(false);
   const [txtBaudRate, setTxtBaudRate] = useState('');
-  const [txtPortError, setTxtPortError] = useState({
-    error: false,
-    message: ''
-  });
   const [txtBaudRateError, setTxtBaudRateError] = useState({
     error: false,
     message: ''
@@ -86,23 +89,66 @@ export default function ConnectionSettings() {
     type: 'info',
     message: ''
   });
+  const [getConnectionPromiseResolved, setGetConnectionPromiseResolved] = useState(false);
+  const [getPortsPromiseResolved, setGetPortsPromiseResolved] = useState(false);
+
+  const inputLabel = useRef();
+  const [labelWidth, setLabelWidth] = useState(0);
+  useEffect(() => {
+    if (getConnectionPromiseResolved && getPortsPromiseResolved) {
+      setLabelWidth(inputLabel.current.offsetWidth);
+    }
+  }, [getPortsPromiseResolved, getConnectionPromiseResolved]);
 
   useEffect(() => {
 
     connectionService.getConnection().then((data) => {
 
       if (checkResponse(data)) {
-        setTxtPort(data.port);
+        setSelPort(data.port);
         setTxtBaudRate(data.baudrate);
       }
 
+      setGetConnectionPromiseResolved(true);
+
+    });
+
+    connectionService.getPorts().then((data) => {
+
+      if (checkResponse(data)) {
+        setAvailablePorts(data);
+      }
+
+      setGetPortsPromiseResolved(true);
+      
     });
 
   }, []);
 
-  function handleTxtPortChange(e) {
-    setTxtPort(e.target.value);
-    checkTxtPort(e.target.value);
+  useInterval(() => {
+
+    connectionService.getPorts().then((data) => {
+
+      if (checkResponse(data)) {
+        setAvailablePorts(data);
+      }
+
+      setGetPortsPromiseResolved(true);
+      
+    });
+
+  }, 2000);
+
+  function handleSelPortOpen() {
+    setSelPortOpen(true);
+  }
+
+  function handleSelPortClose() {
+    setSelPortOpen(false);
+  }
+
+  function handleSelPortChange(e) {
+    setSelPort(e.target.value);
   }
 
   function handleTxtBaudRateChange(e) {
@@ -115,16 +161,13 @@ export default function ConnectionSettings() {
 
     let valid = true;
 
-    if (!checkTxtPort(txtPort)) {
-      valid = false;
-    }
     if (!checkTxtBaudRate(txtBaudRate)) {
       valid = false;
     }
     
     if (valid) {
       connectionService.setConnection({
-        port: txtPort,
+        port: selPort,
         baudrate: txtBaudRate
       }).then((data) => {
 
@@ -153,26 +196,6 @@ export default function ConnectionSettings() {
 
       });
     }
-  }
-
-  function checkTxtPort(port) {
-    if (validator.isEmpty(port)) {
-      setTxtPortError({
-        error: true,
-        message: 'Please enter a port.'
-      });
-      return false;
-    } else {
-      resetTxtPortError();
-      return true;
-    }
-  }
-
-  function resetTxtPortError() {
-    setTxtPortError({
-      error: false,
-      message: ''
-    });
   }
 
   function checkTxtBaudRate(baudrate) {
@@ -208,52 +231,64 @@ export default function ConnectionSettings() {
         <Typography variant="h5" align="center" color="textPrimary" paragraph>
           Connection
         </Typography>
-        <Paper className={classes.paper}>
-          <form className={classes.form} onSubmit={handleSubmit}>
-            <FormControl margin="normal" required fullWidth>
-              <TextField  
-                className={classes.textField}
-                type="text"
-                name="txtPort"
-                autoComplete="port"
-                margin="normal"
-                label="Port"
-                variant="outlined" 
-                value={txtPort}
-                onChange={handleTxtPortChange}
-                error={txtPortError.error}
-                helperText={txtPortError.message}
 
-              />
-            </FormControl>
-            <FormControl margin="normal" required fullWidth>
-              <TextField  
-                className={classes.textField}
-                type="text"
-                name="txtBaudRate"
-                autoComplete="Baudrate"
-                margin="normal"
-                label="Baudrate"
-                variant="outlined" 
-                value={txtBaudRate}
-                onChange={handleTxtBaudRateChange}
-                error={txtBaudRateError.error}
-                helperText={txtBaudRateError.message}
+        { !getConnectionPromiseResolved || !getPortsPromiseResolved ? (
+          <Spinner />
+        ) : (
+          <Paper className={classes.paper}>
+            <form className={classes.form} onSubmit={handleSubmit}>
+              <FormControl variant="outlined" margin="normal" required fullWidth>
+              <InputLabel ref={inputLabel} id="demo-simple-select-outlined-label">
+                Port
+              </InputLabel>
+                <Select
+                  labelId="demo-controlled-open-select-label"
+                  id="demo-controlled-open-select"
+                  variant="outlined" 
+                  open={selPortOpen}
+                  onClose={handleSelPortClose}
+                  onOpen={handleSelPortOpen}
+                  value={selPort}
+                  onChange={handleSelPortChange}
+                  labelWidth={labelWidth}
+                >
 
-              />
-            </FormControl>
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              color="primary"
-              className={classes.submit}
-              disabled={false}
-            >
-              {'Save'/*this.state.loading ? 'Bitte warten...' : 'Speichern'*/}
-            </Button>
-          </form>
+                  { availablePorts.map((port) => (
+                    <MenuItem key={port.comName} value={port.comName}>{port.comName + ' (' + port.manufacturer + ')'}</MenuItem>
+                  ))}
+
+                </Select>
+              </FormControl>
+              <FormControl margin="normal" required fullWidth>
+                <TextField  
+                  className={classes.textField}
+                  type="text"
+                  name="txtBaudRate"
+                  autoComplete="Baudrate"
+                  margin="normal"
+                  label="Baudrate"
+                  variant="outlined" 
+                  value={txtBaudRate}
+                  onChange={handleTxtBaudRateChange}
+                  error={txtBaudRateError.error}
+                  helperText={txtBaudRateError.message}
+
+                />
+              </FormControl>
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                color="primary"
+                className={classes.submit}
+                disabled={false}
+              >
+                {'Save'/*this.state.loading ? 'Bitte warten...' : 'Speichern'*/}
+              </Button>
+            </form>
           </Paper>
+        )}
+
       </main>
       <Snackbar 
         message={snackbarMessage.message} 

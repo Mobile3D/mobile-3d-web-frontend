@@ -101,8 +101,6 @@ export default function Status(props) {
     });
 
     subscribeToEvent('printStatus', (status) => {
-      console.log(status);
-      setPrintStatus(status);
       if (status === 'connected') {
         setPrinterStatus({
           connected: true,
@@ -151,6 +149,12 @@ export default function Status(props) {
   
     });
 
+    subscribeToEvent('info', (data) => {
+      setPrintStatus(data.status);
+    });
+
+    emitEvent('getInfo');
+
     subscribeToEvent('printProgress', (progress) => {
       setPrintProgress((progress.sent/progress.total)*100);
       window.sessionStorage.setItem('print_progress_percentage', (progress.sent/progress.total)*100);
@@ -160,6 +164,7 @@ export default function Status(props) {
       unsubscribeFromEvent('newFileToPrint');
       unsubscribeFromEvent('deleteLoadedFile');
       unsubscribeFromEvent('printStatus');
+      unsubscribeFromEvent('info');
       unsubscribeFromEvent('printProgress');
     }
 
@@ -214,9 +219,8 @@ export default function Status(props) {
             <Typography component="h5" variant="h5">
               {props.printer.info.name}
             </Typography>
-            <Typography component="span" variant="subtitle1" color={printerStatus.connected || printerStatus.connecting ? 'textSecondary' : 'error'}>
-              {printerStatus.connected && !printerStatus.connecting ? 'Connected' : 'Not Connected'}
-              {printerStatus.connecting ? 'Connecting...' : ''}
+            <Typography component="span" variant="subtitle1" color={printStatus !== 'disconnected' ? 'textSecondary' : 'error'}>
+              {printStatus !== 'connecting' ? printStatus !== 'disconnected' ? 'Connected' : 'Not Connected' : 'Connecting...'}
             </Typography>
             <Typography component="span" variant="subtitle1">
               {printerStatus.connected ? (<span>&nbsp;-&nbsp;</span>) : (<span></span>)}

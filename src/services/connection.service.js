@@ -2,7 +2,8 @@ import { apiHelper } from '../helpers/api.helper';
 
 export const connectionService = {
   setConnection,
-  getConnection
+  getConnection,
+  getPorts
 };
 
 async function setConnection(body) {
@@ -16,6 +17,13 @@ async function setConnection(body) {
 
 async function getConnection() {
   return fetch(apiHelper.getUrl() + '/connection', {
+    headers: apiHelper.getHeaders()
+  })
+  .then(res => res.json());
+}
+
+async function getPorts() {
+  return fetch(apiHelper.getUrl() + '/ports', {
     headers: apiHelper.getHeaders()
   })
   .then(res => res.json());

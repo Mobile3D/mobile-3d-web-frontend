@@ -24,7 +24,7 @@ import UploadDialog from '../components/uploaddialog.component';
 import { uploadService } from '../services/uploads.service';
 import { checkResponse, apiHelper } from '../helpers/api.helper';
 import { filesHelper } from '../helpers/files.helper';
-import { emitEvent } from '../services/socket.service';
+import { emitEvent, subscribeToEvent, unsubscribeFromEvent } from '../services/socket.service';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -95,6 +95,7 @@ export default function Files(props) {
   const [deleteItemName, setDeleteItemName] = useState('');
   const [deleteItemId, setDeleteItemId] = useState(0);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [printStatus, setPrintStatus] = useState({});
 
   const snackbar = useRef();
   const uploadDialog = useRef();
@@ -104,7 +105,15 @@ export default function Files(props) {
     
     loadFiles();
 
-    
+    subscribeToEvent('info', (data) => {
+      setPrintStatus(data.status);
+    });
+
+    emitEvent('getInfo');
+
+    return () => {
+      unsubscribeFromEvent('info');
+    }
 
   }, []);
 
@@ -253,9 +262,11 @@ export default function Files(props) {
                         </Hidden>
                         <TableCell align="right">
                           <Tooltip title="Print">
-                            <IconButton className={classes.button} aria-label="Print" onClick={() => handlePrintIconClick(row._id, row.originalname)}>
-                              <PrintIcon fontSize="small" />
-                            </IconButton>
+                            <span>
+                              <IconButton className={classes.button} aria-label="Print" onClick={() => handlePrintIconClick(row._id, row.originalname)} disabled={printStatus !== 'ready'}>
+                                <PrintIcon fontSize="small" />
+                              </IconButton>
+                            </span>
                           </Tooltip>
                           <Tooltip title="Download">
                             <IconButton className={classes.button} onClick={() => handleDownloadIconClick(row._id, row.filename)} aria-label="Download">
@@ -263,9 +274,11 @@ export default function Files(props) {
                             </IconButton>
                           </Tooltip>
                           <Tooltip title="Delete">
-                            <IconButton className={classes.button} onClick={() => handleDeleteClick(row)} aria-label="Delete">
-                              <DeleteIcon fontSize="small" />
-                            </IconButton>
+                            <span>
+                              <IconButton className={classes.button} onClick={() => handleDeleteClick(row)} aria-label="Delete" disabled={row._id === parseInt(window.sessionStorage.getItem('print_file_id'))}>
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            </span>
                           </Tooltip>
                         </TableCell>
                       </TableRow>
