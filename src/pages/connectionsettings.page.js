@@ -91,9 +91,11 @@ export default function ConnectionSettings() {
   });
   const [getConnectionPromiseResolved, setGetConnectionPromiseResolved] = useState(false);
   const [getPortsPromiseResolved, setGetPortsPromiseResolved] = useState(false);
+  const [noAvailablePorts, setNoAvailablePorts] = useState(true);
 
   const inputLabel = useRef();
   const [labelWidth, setLabelWidth] = useState(0);
+
   useEffect(() => {
     if (getConnectionPromiseResolved && getPortsPromiseResolved) {
       setLabelWidth(inputLabel.current.offsetWidth);
@@ -106,6 +108,7 @@ export default function ConnectionSettings() {
 
       if (checkResponse(data)) {
         setSelPort(data.port);
+        setAvailablePorts([{comName: data.port, manufacturer: 'unavailable'}]);
         setTxtBaudRate(data.baudrate);
       }
 
@@ -116,7 +119,12 @@ export default function ConnectionSettings() {
     connectionService.getPorts().then((data) => {
 
       if (checkResponse(data)) {
-        setAvailablePorts(data);
+        if (data.length > 0) {
+          setAvailablePorts(data);
+          setNoAvailablePorts(false);
+        } else {
+          setNoAvailablePorts(true);
+        }
       }
 
       setGetPortsPromiseResolved(true);
@@ -130,7 +138,12 @@ export default function ConnectionSettings() {
     connectionService.getPorts().then((data) => {
 
       if (checkResponse(data)) {
-        setAvailablePorts(data);
+        if (data.length > 0) {
+          setAvailablePorts(data);
+          setNoAvailablePorts(false);
+        } else {
+          setNoAvailablePorts(true);
+        }
       }
 
       setGetPortsPromiseResolved(true);
@@ -251,6 +264,7 @@ export default function ConnectionSettings() {
                   value={selPort}
                   onChange={handleSelPortChange}
                   labelWidth={labelWidth}
+                  disabled={noAvailablePorts}
                 >
 
                   { availablePorts.map((port) => (
@@ -272,6 +286,7 @@ export default function ConnectionSettings() {
                   onChange={handleTxtBaudRateChange}
                   error={txtBaudRateError.error}
                   helperText={txtBaudRateError.message}
+                  disabled={noAvailablePorts}
 
                 />
               </FormControl>
@@ -281,9 +296,9 @@ export default function ConnectionSettings() {
                 variant="contained"
                 color="primary"
                 className={classes.submit}
-                disabled={false}
+                disabled={noAvailablePorts}
               >
-                {'Save'/*this.state.loading ? 'Bitte warten...' : 'Speichern'*/}
+                { noAvailablePorts ? 'No ports available' : 'Save' }
               </Button>
             </form>
           </Paper>

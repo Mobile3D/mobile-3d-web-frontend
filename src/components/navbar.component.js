@@ -87,6 +87,7 @@ export default function Navbar(props) {
   const [printStatus, setPrintStatus] = useState('');
   const [printStatusPromiseResolved, setPrintStatusPromiseResolved] = useState(false);
   const [connectingIconDisabled, setConnectingIconDisabled] = useState(true);
+  const [printIconDisabled, setPrintIconDisabled] = useState(true);
 
   function handleMenuButtonClick() {
     setShowDrawer(true);
@@ -116,9 +117,15 @@ export default function Navbar(props) {
   }, []);
   
   useInterval(() => {
+
     if (printStatus === 'connecting') {
       setConnectingIconDisabled(!connectingIconDisabled);
     }
+
+    if (printStatus === 'stopping') {
+      setPrintIconDisabled(!printIconDisabled);
+    }
+
   }, 500);
 
   return (
@@ -142,7 +149,7 @@ export default function Navbar(props) {
 
           <Tooltip title={printStatus === 'printing' ? 'Printing...' : 'Ready'}>
             <span>
-              <IconButton color="inherit" disableRipple disabled={(printStatus !== 'printing' && printStatus !== 'stopping') || !printStatusPromiseResolved}>
+              <IconButton color="inherit" disableRipple disabled={(printStatus !== 'printing' && printStatus !== 'stopping') || (printStatus === 'stopping' && printIconDisabled) || !printStatusPromiseResolved}>
                 <PrintIcon fontSize="small" />
               </IconButton>
             </span>

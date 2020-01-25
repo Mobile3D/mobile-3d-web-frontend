@@ -107,12 +107,12 @@ const CustomizedSnackbar = forwardRef((props, ref) => {
         autoHideDuration={6000}
         onClose={handleClose}
       >
-        { props.printAction ? (
+        { props.printAction && props.printStatus ? (
           <MySnackbarContentWrapper
             onClose={handleClose}
             variant={props.variant}
             message={props.message}
-            action={(<Button color="secondary" onClick={props.handlePrintNowClick}>
+            action={(<Button color="secondary" onClick={props.handlePrintNowClick} disabled={props.printStatus !== 'ready'}>
               Print Now
             </Button>)}
           />

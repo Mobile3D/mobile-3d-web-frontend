@@ -263,7 +263,7 @@ export default function Files(props) {
                           {row.originalname}
                         </TableCell>
                         <Hidden xsDown={true}>
-                          <TableCell>{(row.size / 1000) + ' KB'}</TableCell>
+                          <TableCell>{filesHelper.getSize(row.size).size + ' ' + filesHelper.getSize(row.size).unit}</TableCell>
                         </Hidden>
                         <TableCell align="right">
                           <Tooltip title="Print">
@@ -327,6 +327,7 @@ export default function Files(props) {
           <Snackbar 
             message={snackbarMessage.message} 
             variant={snackbarMessage.type}
+            printStatus={printStatus}
             printAction={snackbarMessage.printAction}
             handlePrintNowClick={handlePrintNowClick}
             ref={snackbar} 
