@@ -23,7 +23,7 @@ async function getConnection() {
 }
 
 async function getPorts() {
-  return fetch(apiHelper.getUrl() + '/ports', {
+  return fetch(apiHelper.getUrl() + '/connection/ports', {
     headers: apiHelper.getHeaders()
   })
   .then(res => res.json());
