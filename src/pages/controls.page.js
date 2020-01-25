@@ -99,7 +99,7 @@ export default function Controls(props) {
             <ListItemText primary="Control Settings" secondary="Set the fan speed, the temperature and extrude or retract" />
             {openControlSettings ? <ExpandLess /> : <ExpandMore />}
           </ListItem>
-          <Collapse in={openControlSettings} timeout="auto" unmountOnExit>
+          <Collapse in={openControlSettings} timeout="auto">
             <div className={classes.controlWindow}>
               <ControlSettings />
             </div>
@@ -109,7 +109,7 @@ export default function Controls(props) {
             <ListItemText primary="Axis Controls" secondary="Move the axis of the printer" />
             {openAxisControls ? <ExpandLess /> : <ExpandMore />}
           </ListItem>
-          <Collapse in={openAxisControls} timeout="auto" unmountOnExit>
+          <Collapse in={openAxisControls} timeout="auto">
             <div className={classes.controlWindow}>
               <AxisControls />
             </div>

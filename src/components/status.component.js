@@ -17,6 +17,7 @@ import LinearProgress from '@material-ui/core/LinearProgress';
 import { printerService } from '../services/printer.service';
 import Spinner from '../components/spinner.component';
 import ConfirmStopDialog from '../components/confirmstopdialog.component';
+import CompletedDialog from '../components/competeddialog.component';
 import { filesHelper } from '../helpers/files.helper';
 import { subscribeToEvent, emitEvent, unsubscribeFromEvent } from '../services/socket.service';
 
@@ -61,18 +62,12 @@ export default function Status(props) {
 
   const [loadedFile, setLoadedFile] = useState({ id: window.sessionStorage.getItem('print_file_id'), name: window.sessionStorage.getItem('print_file_name')});
   const [loadedFilePromiseResolved, setLoadedFilePromiseResolved] = useState(false);
-  const [printerStatus, setPrinterStatus] = useState({});
   const [printStatus, setPrintStatus] = useState('');
-  const [printerStatusPromiseResolved, setPrinterStatusPromiseResolved] = useState(false);
   const [openConfirmStopDialog, setOpenConfirmStopDialog] = useState(false);
-  const [printProgress, setPrintProgress] = useState(window.sessionStorage.getItem('print_progress_percentage') !== 0 ? window.sessionStorage.getItem('print_progress_percentage') : 0);
+  const [openCompletedDialog, setOpenCompletedDialog] = useState(false);
+  const [printProgress, setPrintProgress] = useState({});
 
   useEffect(() => {
-    printerService.getStatus().then((data) => {
-      setPrinterStatus(data);
-      setPrinterStatusPromiseResolved(true);
-    });
-
     printerService.getLoadedFile().then((data) => {
       if (data.id !== null || data.name !== null) {
         setLoadedFile(data);
@@ -83,6 +78,22 @@ export default function Status(props) {
   }, []);
 
   useEffect(() => {
+
+    subscribeToEvent('info', (data) => {
+      setPrintStatus(data.status);
+      setPrintProgress((data.progress.sent/data.progress.total)*100);
+      if (data.status === 'completed') {
+        window.sessionStorage.removeItem('print_file_id');
+        window.sessionStorage.removeItem('print_file_name');
+        setLoadedFile({
+          id: null,
+          name: null
+        });
+        setOpenCompletedDialog(true);
+      }
+    });
+
+    emitEvent('getInfo');
 
     subscribeToEvent('newFileToPrint', (file) => {
       window.sessionStorage.setItem('print_file_id', file.id);
@@ -101,70 +112,30 @@ export default function Status(props) {
     });
 
     subscribeToEvent('printStatus', (status) => {
-      if (status === 'connected') {
-        setPrinterStatus({
-          connected: true,
-          ready: true,
-          connecting: false
-        });
-      } else if (status === 'connecting') {
-        setPrinterStatus({
-          connected: false,
-          ready: false,
-          connecting: true
-        });
-      } else if (status === 'ready') {
-        setPrinterStatus({
-          connected: true,
-          ready: true,
-          connecting: false
-        });
-      } else if (status === 'printing') {
-        setPrinterStatus({
-          connected: true,
-          ready: false,
-          connecting: false
-        });
-      } else if (status === 'completed') {
+
+      setPrintStatus(status);
+      if (status === 'completed') {
+        setOpenCompletedDialog(true);
         window.sessionStorage.removeItem('print_file_id');
-        window.sessionStorage.removeItem('print_file_name');
-        window.sessionStorage.removeItem('print_progress_percentage');
         setLoadedFile({
           id: null,
           name: null
         });
-      } else if (status === 'stopped') {
-        setPrinterStatus({
-          connected: true,
-          ready: true,
-          connecting: false
-        });
-      } else if (status === 'disconnected') {
-        setPrinterStatus({
-          connected: false,
-          ready: false,
-          connecting: false
-        });
+        setPrintProgress(0);
+        emitEvent('deleteLoadedFile');
       }
-  
-    });
 
-    subscribeToEvent('info', (data) => {
-      setPrintStatus(data.status);
     });
-
-    emitEvent('getInfo');
 
     subscribeToEvent('printProgress', (progress) => {
       setPrintProgress((progress.sent/progress.total)*100);
-      window.sessionStorage.setItem('print_progress_percentage', (progress.sent/progress.total)*100);
     });
 
     return () => {
+      unsubscribeFromEvent('info');
       unsubscribeFromEvent('newFileToPrint');
       unsubscribeFromEvent('deleteLoadedFile');
       unsubscribeFromEvent('printStatus');
-      unsubscribeFromEvent('info');
       unsubscribeFromEvent('printProgress');
     }
 
@@ -172,12 +143,6 @@ export default function Status(props) {
 
   const handlePlayButtonClick = (e) => {
     emitEvent('printFile', window.sessionStorage.getItem('print_file_id'));
-    setPrinterStatus({
-      connected: printerStatus.connected,
-      ready: false,
-      busy: printerStatus.busy,
-      connecting: false
-    });
   }
 
   const handleStopButtonClick = (e) => {
@@ -193,6 +158,11 @@ export default function Status(props) {
     emitEvent('cancelPrint');
   }
 
+  const handleConfirmCompletedPrint = () => {
+    setOpenCompletedDialog(false);
+    window.sessionStorage.removeItem('print_file_name');
+  }
+
   const handleDeleteClick = () => {
     window.sessionStorage.removeItem('print_file_id');
     window.sessionStorage.removeItem('print_file_name');
@@ -203,7 +173,7 @@ export default function Status(props) {
     emitEvent('deleteLoadedFile');
   }
 
-  if (!printerStatusPromiseResolved || !loadedFilePromiseResolved) {
+  if (!loadedFilePromiseResolved) {
     return (
       <div>
         <Spinner />
@@ -216,22 +186,26 @@ export default function Status(props) {
       <Card className={classes.card}>
         <div className={classes.details}>
           <CardContent className={classes.content}>
+            
             <Typography component="h5" variant="h5">
               {props.printer.info.name}
             </Typography>
+
             <Typography component="span" variant="subtitle1" color={printStatus !== 'disconnected' ? 'textSecondary' : 'error'}>
-              {printStatus !== 'connecting' ? printStatus !== 'disconnected' ? 'Connected' : 'Not Connected' : 'Connecting...'}
-            </Typography>
-            <Typography component="span" variant="subtitle1">
-              {printerStatus.connected ? (<span>&nbsp;-&nbsp;</span>) : (<span></span>)}
+              {printStatus === 'connecting' ? 'Connecting...' : ''}
+              {printStatus === 'disconnected' ? 'Not Connected' : ''}
             </Typography>
             <Typography component="span" variant="subtitle1" color={printStatus === 'stopping' ? 'error' : 'primary'}>
-              {printerStatus.connected ? !printerStatus.ready ? printStatus === 'stopping' ? 'Stopping...' : 'Printing...' : 'Ready' : (<div></div>)}
+              {printStatus === 'ready' ? 'Ready' : ''}
+              {printStatus === 'printing' ? 'Printing...' : ''}
+              {printStatus === 'stopping' ? 'Stopping...' : ''}
             </Typography>
+
             <Typography variant="subtitle1" color={loadedFile.id !== null ? 'initial' : 'error'}>
-              { !printerStatus.connected || loadedFile.id !== null ? loadedFile.name : 'No file loaded' }
+              { printStatus === 'disconnected' || loadedFile.id !== null ? loadedFile.name : 'No file loaded' }
             </Typography>
-           { printerStatus.connected && !printerStatus.ready ? (
+
+           { printStatus !== 'disconnected' && (printStatus === 'printing' || printStatus === 'stopping') ? (
               <div>
                 <LinearProgress className={classes.progressbar} variant="determinate" value={parseInt(printProgress)} />
                 <Typography variant="subtitle1">
@@ -239,7 +213,8 @@ export default function Status(props) {
                 </Typography>
               </div>
            ) : (<div></div>) }
-            { !printerStatus.connected || loadedFile.id !== null ? (<div></div>): (
+
+            { printStatus === 'disconnected' || loadedFile.id !== null ? (<div></div>) : (
               <ButtonGroup className={classes.buttonGroup} color="primary" aria-label="outlined primary button group">
                 <Button>
                   <Link to="/files" className={classes.link} >
@@ -248,13 +223,14 @@ export default function Status(props) {
                 </Button>
               </ButtonGroup>
             )}
+
           </CardContent>
           <div className={classes.controls}>
             {/* <IconButton aria-label="pause" disabled={!printerStatus.ready && !printerStatus.busy}>
               <PauseIcon />
             </IconButton> */}
 
-            { (!printerStatus.connected && loadedFile.id !== null) || (printerStatus.ready && loadedFile.id !== null) ? (
+            { (printStatus === 'disconnected' && loadedFile.id !== null) || (printStatus === 'ready' && loadedFile.id !== null) ? (
             <Tooltip title="Remove File">
               <span>
                 <IconButton className={classes.button} onClick={handleDeleteClick} aria-label="Delete">
@@ -265,14 +241,14 @@ export default function Status(props) {
             
             <Tooltip title="Start Printing">
               <span>
-                <IconButton aria-label="play" disabled={!(printerStatus.connected && printerStatus.ready && loadedFile.id !== null)} onClick={handlePlayButtonClick}>
+                <IconButton aria-label="play" disabled={!(printStatus !== 'disconnected' && printStatus === 'ready' && loadedFile.id !== null)} onClick={handlePlayButtonClick}>
                   <PlayArrowIcon className={classes.playIcon} />
                 </IconButton>
               </span>
             </Tooltip>
             <Tooltip title="Cancel">
               <span>
-                <IconButton aria-label="stop" disabled={!(printerStatus.connected && !printerStatus.ready) || printStatus === 'stopping'} onClick={handleStopButtonClick}>
+                <IconButton aria-label="stop" disabled={!(printStatus !== 'disconnected' && printStatus !== 'ready') || printStatus === 'stopping'} onClick={handleStopButtonClick}>
                   <StopIcon />
                 </IconButton>
               </span>
@@ -294,6 +270,11 @@ export default function Status(props) {
         deleteType="file"
         onCancelDelete={handleStopCancel} 
         onConfirmDelete={handleStopConfirm} 
+      />
+
+      <CompletedDialog 
+        open={openCompletedDialog} 
+        onConfirm={handleConfirmCompletedPrint} 
       />
 
     </div>

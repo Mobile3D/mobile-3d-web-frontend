@@ -1,14 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { fade } from '@material-ui/core/styles/colorManipulator';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
+import Tooltip from '@material-ui/core/Tooltip';
 import MenuIcon from '@material-ui/icons/Menu';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
+import PrintIcon from '@material-ui/icons/Print';
+import NotConnectedIcon from '@material-ui/icons/SignalCellularConnectedNoInternet4Bar';
+import ConnectedIcon from '@material-ui/icons/SignalCellular4Bar';
 import { Link } from 'react-router-dom';
 import SideDrawer from './sidedrawer.component';
+import { subscribeToEvent, unsubscribeFromEvent, emitEvent } from '../services/socket.service';
+import { useInterval } from '../hooks/interval.hook';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -78,6 +84,9 @@ export default function Navbar(props) {
   const classes = useStyles();
 
   const [showDrawer, setShowDrawer] = useState(false);
+  const [printStatus, setPrintStatus] = useState('');
+  const [printStatusPromiseResolved, setPrintStatusPromiseResolved] = useState(false);
+  const [connectingIconDisabled, setConnectingIconDisabled] = useState(true);
 
   function handleMenuButtonClick() {
     setShowDrawer(true);
@@ -86,6 +95,31 @@ export default function Navbar(props) {
   function handleDrawerClose() {
     setShowDrawer(false);
   }
+
+  useEffect(() => {
+
+    subscribeToEvent('info', (data) => {
+      setPrintStatus(data.status);
+      setPrintStatusPromiseResolved(true);
+    });
+    emitEvent('getInfo');
+
+    subscribeToEvent('printStatus', (status) => {
+      setPrintStatus(status);
+      setPrintStatusPromiseResolved(true);
+    });
+
+    return () => {
+      unsubscribeFromEvent('info');
+      unsubscribeFromEvent('printStatus');
+    }
+  }, []);
+  
+  useInterval(() => {
+    if (printStatus === 'connecting') {
+      setConnectingIconDisabled(!connectingIconDisabled);
+    }
+  }, 500);
 
   return (
     <div className={classes.root}>
@@ -105,6 +139,23 @@ export default function Navbar(props) {
           <Typography variant="h6" color="inherit" className={classes.grow}>
             { props.title }
           </Typography>
+
+          <Tooltip title={printStatus === 'printing' ? 'Printing...' : 'Ready'}>
+            <span>
+              <IconButton color="inherit" disableRipple disabled={(printStatus !== 'printing' && printStatus !== 'stopping') || !printStatusPromiseResolved}>
+                <PrintIcon fontSize="small" />
+              </IconButton>
+            </span>
+          </Tooltip>
+          <Tooltip title={printStatus !== 'disconnected' ? printStatus === 'connecting' ? 'Connecting...' : 'Connected' : 'Connection failed'}>
+            <span>
+              <IconButton color="inherit" disableRipple disabled={connectingIconDisabled && printStatus === 'connecting'}>
+                { printStatus === 'disconnected' ? (<NotConnectedIcon fontSize="small" />) : (<div></div>) }
+                { printStatus !== 'disconnected' ? (<ConnectedIcon fontSize="small" />) : (<div></div>) }
+              </IconButton>
+            </span>
+          </Tooltip>
+
         </Toolbar>
       </AppBar>
       <SideDrawer open={showDrawer} onDrawerClose={ handleDrawerClose } selectedPage={ props.selectedPage } />

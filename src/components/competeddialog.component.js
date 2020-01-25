@@ -6,30 +6,27 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 
-export default function DeleteDialog(props) {
+export default function CompletedDialog(props) {
 
   return (
     <div>
       <Dialog
         open={props.open}
-        onClose={props.onCancelDelete}
+        onClose={props.onConfirmCompletedPrint}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
         <DialogTitle id="alert-dialog-title">
-            Are you sure you want to delete the {props.deleteType} "{props.deleteItemName}"?
+            Your item has been printed.
         </DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            This action cannot be undone.
+            You can remove your item from the printer.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={props.onConfirmDelete} color="primary">
-            Yes
-          </Button>
-          <Button onClick={props.onCancelDelete} autoFocus>
-            No
+          <Button onClick={props.onConfirm} color="primary">
+            Okay
           </Button>
         </DialogActions>
       </Dialog>

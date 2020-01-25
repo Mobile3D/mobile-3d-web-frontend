@@ -111,8 +111,13 @@ export default function Files(props) {
 
     emitEvent('getInfo');
 
+    subscribeToEvent('printStatus', (status) => {
+      setPrintStatus(status);
+    });
+
     return () => {
       unsubscribeFromEvent('info');
+      unsubscribeFromEvent('printStatus');
     }
 
   }, []);
