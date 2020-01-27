@@ -194,10 +194,10 @@ export default function ConnectionSettings() {
 
           snackbar.current.handleOpen();
 
-          setTimeout(() => {
-            console.log('restarting...');
-            window.location.reload();
-          }, 2000);
+          // setTimeout(() => {
+          //   console.log('restarting...');
+          //   window.location.reload();
+          // }, 2000);
 
         } else {
           setSnackbarMessage({
@@ -255,7 +255,6 @@ export default function ConnectionSettings() {
                 Port
               </InputLabel>
                 <Select
-                  labelId="demo-controlled-open-select-label"
                   id="demo-controlled-open-select"
                   variant="outlined" 
                   open={selPortOpen}

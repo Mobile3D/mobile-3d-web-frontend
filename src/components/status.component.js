@@ -4,7 +4,7 @@ import Typography from '@material-ui/core/Typography';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import Button from '@material-ui/core/Button';
-import ButtonGroup from '@material-ui/core/ButtonGroup';
+import Chip from '@material-ui/core/Chip';
 import IconButton from '@material-ui/core/IconButton';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -36,8 +36,9 @@ const useStyles = makeStyles(theme => ({
     height: 38,
     width: 38,
   },
-  buttonGroup: {
-    marginTop: theme.spacing(3),
+  button: {
+    marginTop: theme.spacing(1),
+    marginBottom: theme.spacing(1),
   },
   link: {
     textDecoration: 'none',
@@ -55,6 +56,16 @@ const useStyles = makeStyles(theme => ({
     marginLeft: theme.spacing(2),
     marginRight: theme.spacing(2),
   },
+  temperature: {
+    marginTop: theme.spacing(1),
+  },
+  chip: {
+    marginTop: theme.spacing(1),
+  },
+  status: {
+    marginTop: theme.spacing(1),
+    marginBottom: theme.spacing(1),
+  },
 }));
 
 export default function Status(props) {
@@ -66,6 +77,7 @@ export default function Status(props) {
   const [openConfirmStopDialog, setOpenConfirmStopDialog] = useState(false);
   const [openCompletedDialog, setOpenCompletedDialog] = useState(false);
   const [printProgress, setPrintProgress] = useState({});
+  const [printTemperature, setPrintTemperature] = useState({ hotend: { current: 0, set: 0 }, heatbed: { current: 0, set: 0 }});
 
   useEffect(() => {
     printerService.getLoadedFile().then((data) => {
@@ -131,12 +143,17 @@ export default function Status(props) {
       setPrintProgress((progress.sent/progress.total)*100);
     });
 
+    subscribeToEvent('temperature', (temp) => {
+      setPrintTemperature(temp);
+    });
+
     return () => {
       unsubscribeFromEvent('info');
       unsubscribeFromEvent('newFileToPrint');
       unsubscribeFromEvent('deleteLoadedFile');
       unsubscribeFromEvent('printStatus');
       unsubscribeFromEvent('printProgress');
+      unsubscribeFromEvent('temperature');
     }
 
   }, []);
@@ -192,37 +209,66 @@ export default function Status(props) {
             </Typography>
 
             <Typography component="span" variant="subtitle1" color={printStatus !== 'disconnected' ? 'textSecondary' : 'error'}>
-              {printStatus === 'connecting' ? 'Connecting...' : ''}
-              {printStatus === 'disconnected' ? 'Not Connected' : ''}
+              <b>{printStatus === 'connecting' ? 'Connecting...' : ''}</b>
+              <b>{printStatus === 'disconnected' ? 'Not Connected' : ''}</b>
             </Typography>
-            <Typography component="span" variant="subtitle1" color={printStatus === 'stopping' ? 'error' : 'primary'}>
-              {printStatus === 'ready' ? 'Ready' : ''}
-              {printStatus === 'printing' ? 'Printing...' : ''}
-              {printStatus === 'stopping' ? 'Stopping...' : ''}
-            </Typography>
+
+            <div className={classes.status}>
+              <Typography component="span" variant="subtitle1" color={printStatus === 'stopping' ? 'error' : 'primary'}>
+                <b>{printStatus === 'ready' ? 'Ready' : ''}</b>
+                <b>{printStatus === 'printing' ? 'Printing...' : ''}</b>
+                <b>{printStatus === 'stopping' ? 'Stopping...' : ''}</b>
+              </Typography>
+            </div>
+
+            {/* <Typography component="div" variant="subtitle1">
+              <b>{ printStatus !== 'disconnected' && printStatus !== 'connecting' ? 'File' : '' }</b>
+            </Typography> */}
 
             <Typography variant="subtitle1" color={loadedFile.id !== null ? 'initial' : 'error'}>
-              { printStatus === 'disconnected' || loadedFile.id !== null ? loadedFile.name : 'No file loaded' }
+              { (printStatus !== 'disconnected' && printStatus !== 'connecting') && loadedFile.id !== null ? (<Chip classes={classes.chip} label={loadedFile.name} />) : '' }
+              {/* { (printStatus !== 'disconnected' && printStatus !== 'connecting') && loadedFile.id === null ? 'No file loaded' : '' } */}
             </Typography>
 
-           { printStatus !== 'disconnected' && (printStatus === 'printing' || printStatus === 'stopping') ? (
+            { printStatus === 'printing' || printStatus === 'stopping' ? (
               <div>
                 <LinearProgress className={classes.progressbar} variant="determinate" value={parseInt(printProgress)} />
                 <Typography variant="subtitle1">
                   { Math.floor(printProgress) === 0 ? 'loading...' : Math.floor(printProgress) + '%' }
                 </Typography>
               </div>
-           ) : (<div></div>) }
+            ) : (<div></div>) }
 
-            { printStatus === 'disconnected' || loadedFile.id !== null ? (<div></div>) : (
-              <ButtonGroup className={classes.buttonGroup} color="primary" aria-label="outlined primary button group">
-                <Button>
-                  <Link to="/files" className={classes.link} >
-                    Choose From Files
-                  </Link>
-                </Button>
-              </ButtonGroup>
-            )}
+            { printStatus !== 'disconnected' && printStatus !== 'connecting' && loadedFile.id === null ? (
+              <Button className={classes.button} variant="outlined" color="primary" aria-label="outlined primary button group">
+                <Link to="/files" className={classes.link} >
+                  Choose A File
+                </Link>
+              </Button>
+            ) : (<div></div>)}
+            
+            <div className={classes.temperature}>
+              <Typography component="div" variant="subtitle1">
+                <b>{printStatus !== 'disconnected' && printStatus !== 'connecting' ? 'Temperature' : ''}</b>
+              </Typography>
+
+              <Typography component="div" variant="subtitle1" color="initial">
+                {printStatus !== 'disconnected' && printStatus !== 'connecting' ? (
+                  <table align="center">
+                    <tr>
+                      <td>Hotend:</td>
+                      <td><b>{printTemperature.hotend.current + '°C'}</b></td>
+                      <td>{'(' + printTemperature.hotend.set + '°C)'}</td>
+                    </tr>
+                    <tr>
+                      <td>Heatbed:</td>
+                      <td><b>{printTemperature.heatbed.current + '°C'}</b></td>
+                      <td>{'(' + printTemperature.heatbed.set + '°C)'}</td>
+                    </tr>
+                  </table>
+                ) : ''}
+              </Typography>
+            </div>
 
           </CardContent>
           <div className={classes.controls}>
@@ -230,10 +276,10 @@ export default function Status(props) {
               <PauseIcon />
             </IconButton> */}
 
-            { (printStatus === 'disconnected' && loadedFile.id !== null) || (printStatus === 'ready' && loadedFile.id !== null) ? (
+            { (printStatus === 'ready' && loadedFile.id !== null) || (printStatus === 'ready' && loadedFile.id !== null) ? (
             <Tooltip title="Remove File">
               <span>
-                <IconButton className={classes.button} onClick={handleDeleteClick} aria-label="Delete">
+                <IconButton className={classes.deleteIcon} onClick={handleDeleteClick} aria-label="Delete">
                   <DeleteIcon fontSize="small" />
                 </IconButton>
               </span>
@@ -248,7 +294,7 @@ export default function Status(props) {
             </Tooltip>
             <Tooltip title="Cancel">
               <span>
-                <IconButton aria-label="stop" disabled={!(printStatus !== 'disconnected' && printStatus !== 'ready') || printStatus === 'stopping'} onClick={handleStopButtonClick}>
+                <IconButton aria-label="stop" disabled={!(printStatus !== 'disconnected' && printStatus !== 'ready') || printStatus === 'stopping' || printStatus === 'connecting'} onClick={handleStopButtonClick}>
                   <StopIcon />
                 </IconButton>
               </span>

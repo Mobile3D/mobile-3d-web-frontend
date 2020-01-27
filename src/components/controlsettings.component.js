@@ -51,7 +51,7 @@ export default function ControlSettings(props) {
   const [numLength, setNumLength] = useState('');
   const [numTemperature, setNumTemperature] = useState('');
   const [printStatus, setPrintStatus] = useState('');
-  const [printTemperature, setPrintTemperature] = useState({});
+  const [printTemperature, setPrintTemperature] = useState({ hotend: { current: 0, set: 0 }, heatbed: { current: 0, set: 0 }});
 
   useEffect(() => {
 
@@ -204,8 +204,8 @@ export default function ControlSettings(props) {
                   disabled={printStatus === 'disconnected'}
                 />
               </div>
-              <div className={classes.settingsButton}><Button variant="contained" size="small" fullWidth onClick={handleSetHeatbedClick} disabled={printStatus === 'disconnected'}>Set Heatbed {printTemperature.heatbed !== 0 ? '(' + printTemperature.heatbed + '°C)' : ''}</Button></div>
-              <div><Button variant="contained" size="small" fullWidth onClick={handleSetHotendClick} disabled={printStatus === 'disconnected'}>Set Hotend {printTemperature.hotend !== 0 ? '(' + printTemperature.hotend + '°C)' : ''}</Button></div>
+              <div className={classes.settingsButton}><Button variant="contained" size="small" fullWidth onClick={handleSetHeatbedClick} disabled={printStatus === 'disconnected'}>Set Heatbed {printTemperature.heatbed.set !== 0 ? '(' + printTemperature.heatbed.set + '°C)' : ''}</Button></div>
+              <div><Button variant="contained" size="small" fullWidth onClick={handleSetHotendClick} disabled={printStatus === 'disconnected'}>Set Hotend {printTemperature.hotend.set !== 0 ? '(' + printTemperature.hotend.set + '°C)' : ''}</Button></div>
             </CardContent>
           </Card>
         </Grid>

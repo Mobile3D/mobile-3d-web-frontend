@@ -268,7 +268,7 @@ export default function Files(props) {
                         <TableCell align="right">
                           <Tooltip title="Print">
                             <span>
-                              <IconButton className={classes.button} aria-label="Print" onClick={() => handlePrintIconClick(row._id, row.originalname)} disabled={printStatus !== 'ready'}>
+                              <IconButton className={classes.button} aria-label="Print" onClick={() => handlePrintIconClick(row._id, row.originalname)} disabled={printStatus !== 'ready' || row._id === parseInt(window.sessionStorage.getItem('print_file_id'))}>
                                 <PrintIcon fontSize="small" />
                               </IconButton>
                             </span>

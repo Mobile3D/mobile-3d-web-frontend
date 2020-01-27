@@ -147,7 +147,7 @@ export default function Navbar(props) {
             { props.title }
           </Typography>
 
-          <Tooltip title={printStatus === 'printing' ? 'Printing...' : 'Ready'}>
+          <Tooltip title={printStatus !== 'ready' ? printStatus === 'stopping' ? 'Stopping...' : 'Printing...' : 'Ready'}>
             <span>
               <IconButton color="inherit" disableRipple disabled={(printStatus !== 'printing' && printStatus !== 'stopping') || (printStatus === 'stopping' && printIconDisabled) || !printStatusPromiseResolved}>
                 <PrintIcon fontSize="small" />
