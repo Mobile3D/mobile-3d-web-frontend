@@ -7,8 +7,7 @@ import Button from '@material-ui/core/Button';
 import Chip from '@material-ui/core/Chip';
 import IconButton from '@material-ui/core/IconButton';
 import PlayArrowIcon from '@material-ui/icons/PlayArrow';
-import DeleteIcon from '@material-ui/icons/Delete';
-//import PauseIcon from '@material-ui/icons/Pause';
+import PauseIcon from '@material-ui/icons/Pause';
 import StopIcon from '@material-ui/icons/Stop';
 import Tooltip from '@material-ui/core/Tooltip';
 import { Link } from 'react-router-dom';
@@ -61,6 +60,7 @@ const useStyles = makeStyles(theme => ({
   },
   chip: {
     marginTop: theme.spacing(1),
+    marginBottom: theme.spacing(1),
   },
   status: {
     marginTop: theme.spacing(1),
@@ -77,7 +77,7 @@ export default function Status(props) {
   const [openConfirmStopDialog, setOpenConfirmStopDialog] = useState(false);
   const [openCompletedDialog, setOpenCompletedDialog] = useState(false);
   const [printProgress, setPrintProgress] = useState({});
-  const [printTemperature, setPrintTemperature] = useState({ hotend: { current: 0, set: 0 }, heatbed: { current: 0, set: 0 }});
+  const [printTemperature, setPrintTemperature] = useState({ hotend: { current: '...', set: '...' }, heatbed: { current: '...', set: '...' }});
 
   useEffect(() => {
     printerService.getLoadedFile().then((data) => {
@@ -159,7 +159,15 @@ export default function Status(props) {
   }, []);
 
   const handlePlayButtonClick = (e) => {
-    emitEvent('printFile', window.sessionStorage.getItem('print_file_id'));
+    if (printStatus === 'paused') {
+      emitEvent('unpausePrint');
+    } else {
+      emitEvent('printFile', window.sessionStorage.getItem('print_file_id'));
+    }
+  }
+
+  const handlePauseButtonClick = (e) => {
+    emitEvent('pausePrint');
   }
 
   const handleStopButtonClick = (e) => {
@@ -208,16 +216,20 @@ export default function Status(props) {
               {props.printer.info.name}
             </Typography>
 
-            <Typography component="span" variant="subtitle1" color={printStatus !== 'disconnected' ? 'textSecondary' : 'error'}>
-              <b>{printStatus === 'connecting' ? 'Connecting...' : ''}</b>
-              <b>{printStatus === 'disconnected' ? 'Not Connected' : ''}</b>
-            </Typography>
+            <div className={classes.status}>
+              <Typography component="span" variant="subtitle1" color={printStatus !== 'disconnected' && printStatus !== 'pausing' ? 'textSecondary' : 'error'}>
+                <b>{printStatus === 'connecting' ? 'Connecting...' : ''}</b>
+                <b>{printStatus === 'disconnected' ? 'Not Connected' : ''}</b>
+                <b>{printStatus === 'paused' ? 'Paused' : ''}</b>
+              </Typography>
+            </div>
 
             <div className={classes.status}>
-              <Typography component="span" variant="subtitle1" color={printStatus === 'stopping' ? 'error' : 'primary'}>
+              <Typography component="span" variant="subtitle1" color={printStatus === 'stopping' || printStatus === 'pausing' ? 'error' : 'primary'}>
                 <b>{printStatus === 'ready' ? 'Ready' : ''}</b>
                 <b>{printStatus === 'printing' ? 'Printing...' : ''}</b>
                 <b>{printStatus === 'stopping' ? 'Stopping...' : ''}</b>
+                <b>{printStatus === 'pausing' ? 'Pausing...' : ''}</b>
               </Typography>
             </div>
 
@@ -226,15 +238,27 @@ export default function Status(props) {
             </Typography> */}
 
             <Typography variant="subtitle1" color={loadedFile.id !== null ? 'initial' : 'error'}>
-              { (printStatus !== 'disconnected' && printStatus !== 'connecting') && loadedFile.id !== null ? (<Chip classes={classes.chip} label={loadedFile.name} />) : '' }
+              { (printStatus !== 'disconnected' && printStatus !== 'connecting') && loadedFile.id !== null ? 
+
+                (
+                <div classes={classes.chip}>
+                  { (printStatus === 'ready' && loadedFile.id !== null) || (printStatus === 'ready' && loadedFile.id !== null) ? (
+                    <Chip label={loadedFile.name} onDelete={handleDeleteClick} />
+                  ) : (
+                    <Chip label={loadedFile.name} />
+                  )}
+                  
+                </div>
+                ) : '' }
+
               {/* { (printStatus !== 'disconnected' && printStatus !== 'connecting') && loadedFile.id === null ? 'No file loaded' : '' } */}
             </Typography>
 
-            { printStatus === 'printing' || printStatus === 'stopping' ? (
+            { printStatus === 'printing' || printStatus === 'stopping' || printStatus === 'pausing' || printStatus === 'paused' ? (
               <div>
                 <LinearProgress className={classes.progressbar} variant="determinate" value={parseInt(printProgress)} />
                 <Typography variant="subtitle1">
-                  { Math.floor(printProgress) === 0 ? 'loading...' : Math.floor(printProgress) + '%' }
+                  { Math.floor(printProgress) === 0 ? printStatus === 'pausing' || printStatus === 'paused' || printStatus === 'stopping' ? '0%' : 'starting...' : Math.floor(printProgress) + '%' }
                 </Typography>
               </div>
             ) : (<div></div>) }
@@ -255,16 +279,18 @@ export default function Status(props) {
               <Typography component="div" variant="subtitle1" color="initial">
                 {printStatus !== 'disconnected' && printStatus !== 'connecting' ? (
                   <table align="center">
-                    <tr>
-                      <td>Hotend:</td>
-                      <td><b>{printTemperature.hotend.current + '°C'}</b></td>
-                      <td>{'(' + printTemperature.hotend.set + '°C)'}</td>
-                    </tr>
-                    <tr>
-                      <td>Heatbed:</td>
-                      <td><b>{printTemperature.heatbed.current + '°C'}</b></td>
-                      <td>{'(' + printTemperature.heatbed.set + '°C)'}</td>
-                    </tr>
+                    <tbody>
+                      <tr>
+                        <td>Hotend:</td>
+                        <td><b>{printTemperature.hotend.current + '°C'}</b></td>
+                        <td>{'(' + printTemperature.hotend.set + '°C)'}</td>
+                      </tr>
+                      <tr>
+                        <td>Heatbed:</td>
+                        <td><b>{printTemperature.heatbed.current + '°C'}</b></td>
+                        <td>{'(' + printTemperature.heatbed.set + '°C)'}</td>
+                      </tr>
+                    </tbody>
                   </table>
                 ) : ''}
               </Typography>
@@ -272,29 +298,24 @@ export default function Status(props) {
 
           </CardContent>
           <div className={classes.controls}>
-            {/* <IconButton aria-label="pause" disabled={!printerStatus.ready && !printerStatus.busy}>
-              <PauseIcon />
-            </IconButton> */}
-
-            { (printStatus === 'ready' && loadedFile.id !== null) || (printStatus === 'ready' && loadedFile.id !== null) ? (
-            <Tooltip title="Remove File">
+            
+            <Tooltip title="Pause">
               <span>
-                <IconButton className={classes.deleteIcon} onClick={handleDeleteClick} aria-label="Delete">
-                  <DeleteIcon fontSize="small" />
+                <IconButton aria-label="pause" disabled={printStatus !== 'printing' || printStatus === 'paused'} onClick={handlePauseButtonClick}>
+                  <PauseIcon />
                 </IconButton>
               </span>
-            </Tooltip>) : (<div></div>)}
-            
-            <Tooltip title="Start Printing">
+            </Tooltip>
+            <Tooltip title={printStatus === 'pausing' || printStatus === 'paused' ? 'Continue' : 'Start'}>
               <span>
-                <IconButton aria-label="play" disabled={!(printStatus !== 'disconnected' && printStatus === 'ready' && loadedFile.id !== null)} onClick={handlePlayButtonClick}>
+                <IconButton aria-label="play" disabled={!(printStatus !== 'disconnected' && (printStatus === 'ready' || printStatus === 'paused') && loadedFile.id !== null)} onClick={handlePlayButtonClick}>
                   <PlayArrowIcon className={classes.playIcon} />
                 </IconButton>
               </span>
             </Tooltip>
             <Tooltip title="Cancel">
               <span>
-                <IconButton aria-label="stop" disabled={!(printStatus !== 'disconnected' && printStatus !== 'ready') || printStatus === 'stopping' || printStatus === 'connecting'} onClick={handleStopButtonClick}>
+                <IconButton aria-label="stop" disabled={!(printStatus !== 'disconnected' && printStatus !== 'ready') || printStatus === 'stopping' || printStatus === 'pausing' || printStatus === 'paused' || printStatus === 'connecting'} onClick={handleStopButtonClick}>
                   <StopIcon />
                 </IconButton>
               </span>

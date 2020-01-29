@@ -9,6 +9,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import MenuIcon from '@material-ui/icons/Menu';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import PrintIcon from '@material-ui/icons/Print';
+import PauseIcon from '@material-ui/icons/Pause';
 import NotConnectedIcon from '@material-ui/icons/SignalCellularConnectedNoInternet4Bar';
 import ConnectedIcon from '@material-ui/icons/SignalCellular4Bar';
 import { Link } from 'react-router-dom';
@@ -122,7 +123,7 @@ export default function Navbar(props) {
       setConnectingIconDisabled(!connectingIconDisabled);
     }
 
-    if (printStatus === 'stopping') {
+    if (printStatus === 'stopping' || printStatus === 'pausing') {
       setPrintIconDisabled(!printIconDisabled);
     }
 
@@ -146,19 +147,29 @@ export default function Navbar(props) {
           <Typography variant="h6" color="inherit" className={classes.grow}>
             { props.title }
           </Typography>
-
-          <Tooltip title={printStatus !== 'ready' ? printStatus === 'stopping' ? 'Stopping...' : 'Printing...' : 'Ready'}>
+          
+          { printStatus === 'pausing' || printStatus === 'paused' ? (
+            <Tooltip title={printStatus === 'pausing' ? 'Pausing...' : 'Paused'}>
             <span>
-              <IconButton color="inherit" disableRipple disabled={(printStatus !== 'printing' && printStatus !== 'stopping') || (printStatus === 'stopping' && printIconDisabled) || !printStatusPromiseResolved}>
-                <PrintIcon fontSize="small" />
+              <IconButton color="inherit" disableRipple>
+                <PauseIcon />
+              </IconButton>
+            </span>
+          </Tooltip>
+          ) : ''}
+
+          <Tooltip title={printStatus !== 'ready' ? printStatus === 'stopping' || printStatus === 'pausing' ? 'Stopping...' : 'Printing...' : 'Ready'}>
+            <span>
+              <IconButton color="inherit" disableRipple disabled={(printStatus !== 'printing' && printStatus !== 'stopping' && printStatus !== 'pausing') || (printStatus === 'stopping' && printIconDisabled) || (printStatus === 'pausing' && printIconDisabled) || !printStatusPromiseResolved}>
+                <PrintIcon />
               </IconButton>
             </span>
           </Tooltip>
           <Tooltip title={printStatus !== 'disconnected' ? printStatus === 'connecting' ? 'Connecting...' : 'Connected' : 'Connection failed'}>
             <span>
               <IconButton color="inherit" disableRipple disabled={connectingIconDisabled && printStatus === 'connecting'}>
-                { printStatus === 'disconnected' ? (<NotConnectedIcon fontSize="small" />) : (<div></div>) }
-                { printStatus !== 'disconnected' ? (<ConnectedIcon fontSize="small" />) : (<div></div>) }
+                { printStatus === 'disconnected' ? (<NotConnectedIcon />) : (<div></div>) }
+                { printStatus !== 'disconnected' ? (<ConnectedIcon />) : (<div></div>) }
               </IconButton>
             </span>
           </Tooltip>

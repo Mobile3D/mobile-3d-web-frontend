@@ -121,11 +121,11 @@ export default function Console(props) {
                   onChange={handleTxtCommandChange}
                   value={txtCommand}
                   onKeyDown={handleEnterKeyDown}
-                  disabled={printStatus === 'disconnected'}
+                  disabled={printStatus !== 'ready'}
                 />
               </Grid>  
               <Grid item sm={2} className={classes.gridItem}>
-                <Button className={classes.button} variant="contained" color="primary" fullWidth onClick={handleBtnSendClick} disabled={printStatus === 'disconnected'}>Send</Button>
+                <Button className={classes.button} variant="contained" color="primary" fullWidth onClick={handleBtnSendClick} disabled={printStatus !== 'ready'}>Send</Button>
               </Grid>            
             </Grid>            
           </CardContent>
