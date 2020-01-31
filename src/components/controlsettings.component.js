@@ -7,7 +7,7 @@ import TextField from '@material-ui/core/TextField';
 import CardContent from '@material-ui/core/CardContent';
 import Button from '@material-ui/core/Button';
 
-import { subscribeToEvent, emitEvent, unsubscribeFromEvent } from '../services/socket.service';
+import { subscribeToTemperature, subscribeToStatus, subscribeToInfo, emitSetHeatbedTemperature, emitSetHotendTemperature, emitFanOn, emitFanOff, emitExtrude, emitRetract, unsubscribeFromInfo, unsubscribeFromStatus, unsubscribeFromTemperature } from '../services/socket.service';
 
 
 const useStyles = makeStyles(theme => ({
@@ -55,23 +55,23 @@ export default function ControlSettings(props) {
 
   useEffect(() => {
 
-    subscribeToEvent('info', (data) => {
+    subscribeToInfo((data) => {
       setPrintStatus(data.status);
       setPrintTemperature(data.temperature);
     });
 
-    subscribeToEvent('printStatus', (status) => {
+    subscribeToStatus((status) => {
       setPrintStatus(status);
     });
 
-    subscribeToEvent('temperature', (temp) => {
+    subscribeToTemperature((temp) => {
       setPrintTemperature(temp);
     });
 
     return () => {
-      unsubscribeFromEvent('info');
-      unsubscribeFromEvent('printStatus');
-      unsubscribeFromEvent('temperature');
+      unsubscribeFromInfo();
+      unsubscribeFromStatus();
+      unsubscribeFromTemperature();
     }
 
   }, []);
@@ -80,9 +80,9 @@ export default function ControlSettings(props) {
     setFanState(state);
 
     if (state === 0) {
-      emitEvent('fanOff');
+      emitFanOff();
     } else {
-      emitEvent('fanOn', numFanSpeed);
+      emitFanOn(numFanSpeed);
     }
 
   }
@@ -95,7 +95,7 @@ export default function ControlSettings(props) {
     if (e.target.value > 0 && e.target.value <= 100) {
       setNumFanSpeed(e.target.value);
       if (fanState === 1) {
-        emitEvent('fanOn', numFanSpeed);
+        emitFanOn(numFanSpeed);
       }
     }
   }
@@ -119,19 +119,19 @@ export default function ControlSettings(props) {
   }
 
   const handleExtrudeClick = () => {
-    emitEvent('extrude', numLength);
+    emitExtrude(numLength);
   }
 
   const handleRetractClick = () => {
-    emitEvent('retract', numLength);
+    emitRetract(numLength);
   }
 
   const handleSetHeatbedClick = () => {
-    emitEvent('setHeatbedTemperature', numTemperature);
+    emitSetHeatbedTemperature(numTemperature);
   }
 
   const handleSetHotendClick = () => {
-    emitEvent('setHotendTemperature', numTemperature);
+    emitSetHotendTemperature(numTemperature);
   }
 
   return (

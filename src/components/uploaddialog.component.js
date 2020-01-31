@@ -19,7 +19,7 @@ import { uploadService } from '../services/uploads.service';
 import { checkResponse } from '../helpers/api.helper';
 import { checkFile } from '../helpers/upload.helper';
 import { filesHelper } from '../helpers/files.helper';
-import { emitEvent } from '../services/socket.service';
+import { emitLoadFile } from '../services/socket.service';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -109,7 +109,7 @@ const UploadDialog = forwardRef((props, ref) => {
 
         if (responseCheck.valid) {
           filesHelper.setNextFile(data._id, data.originalname);
-          emitEvent('loadFile', {id: data._id, name: data.originalname});
+          emitLoadFile({id: data._id, name: data.originalname});
           props.onUploadFinish({
             type: 'success',
             message: 'File "' + data.originalname + '" successfully uploaded.'

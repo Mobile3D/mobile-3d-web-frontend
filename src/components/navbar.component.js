@@ -14,7 +14,7 @@ import NotConnectedIcon from '@material-ui/icons/SignalCellularConnectedNoIntern
 import ConnectedIcon from '@material-ui/icons/SignalCellular4Bar';
 import { Link } from 'react-router-dom';
 import SideDrawer from './sidedrawer.component';
-import { subscribeToEvent, unsubscribeFromEvent, emitEvent } from '../services/socket.service';
+import { subscribeToStatus, subscribeToInfo, unsubscribeFromInfo, unsubscribeFromStatus, emitGetInfo } from '../services/socket.service';
 import { useInterval } from '../hooks/interval.hook';
 
 const useStyles = makeStyles(theme => ({
@@ -100,20 +100,20 @@ export default function Navbar(props) {
 
   useEffect(() => {
 
-    subscribeToEvent('info', (data) => {
+    subscribeToInfo((data) => {
       setPrintStatus(data.status);
       setPrintStatusPromiseResolved(true);
     });
-    emitEvent('getInfo');
+    emitGetInfo();
 
-    subscribeToEvent('printStatus', (status) => {
+    subscribeToStatus((status) => {
       setPrintStatus(status);
       setPrintStatusPromiseResolved(true);
     });
 
     return () => {
-      unsubscribeFromEvent('info');
-      unsubscribeFromEvent('printStatus');
+      unsubscribeFromInfo();
+      unsubscribeFromStatus();
     }
   }, []);
   

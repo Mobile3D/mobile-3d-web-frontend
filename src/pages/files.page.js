@@ -24,7 +24,7 @@ import UploadDialog from '../components/uploaddialog.component';
 import { uploadService } from '../services/uploads.service';
 import { checkResponse, apiHelper } from '../helpers/api.helper';
 import { filesHelper } from '../helpers/files.helper';
-import { emitEvent, subscribeToEvent, unsubscribeFromEvent } from '../services/socket.service';
+import { emitLoadFile, emitGetInfo, emitPrintFile, subscribeToStatus, subscribeToInfo, unsubscribeFromInfo, unsubscribeFromStatus } from '../services/socket.service';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -105,19 +105,19 @@ export default function Files(props) {
     
     loadFiles();
 
-    subscribeToEvent('info', (data) => {
+    subscribeToInfo((data) => {
       setPrintStatus(data.status);
     });
 
-    emitEvent('getInfo');
+    emitGetInfo();
 
-    subscribeToEvent('printStatus', (status) => {
+    subscribeToStatus((status) => {
       setPrintStatus(status);
     });
 
     return () => {
-      unsubscribeFromEvent('info');
-      unsubscribeFromEvent('printStatus');
+      unsubscribeFromInfo();
+      unsubscribeFromStatus();
     }
 
   }, []);
@@ -212,7 +212,7 @@ export default function Files(props) {
 
   const handlePrintIconClick = (id, name) => {
     filesHelper.setNextFile(id, name);
-    emitEvent('loadFile', {id: id, name: name});
+    emitLoadFile({id: id, name: name});
     setSnackbarMessage({
       type: 'info',
       message: '"' + name + '" is ready to be printed. You can make some adjustments in the control panel.',
@@ -226,7 +226,7 @@ export default function Files(props) {
   }
 
   const handlePrintNowClick = () => {
-    emitEvent('printFile', window.sessionStorage.getItem('print_file_id'));
+    emitPrintFile(window.sessionStorage.getItem('print_file_id'));
   }
 
   return (

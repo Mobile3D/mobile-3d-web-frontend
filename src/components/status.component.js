@@ -18,7 +18,7 @@ import Spinner from '../components/spinner.component';
 import ConfirmStopDialog from '../components/confirmstopdialog.component';
 import CompletedDialog from '../components/competeddialog.component';
 import { filesHelper } from '../helpers/files.helper';
-import { subscribeToEvent, emitEvent, unsubscribeFromEvent } from '../services/socket.service';
+import { subscribeToDeleteLoadedFile, subscribeToProgress, subscribeToStatus, subscribeToTemperature, subscribeToInfo, subscribeToNewFileToPrint, emitCancelPrint, emitGetInfo, emitPrintFile, emitPausePrint, emitUnpausePrint, emitDeleteLoadedFile, unsubscribeFromInfo, unsubscribeFromStatus, unsubscribeFromDeleteLoadedFile, unsubscribeFromNewFileToPrint, unsubscribeFromProgress, unsubscribeFromTemperature } from '../services/socket.service';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -91,7 +91,7 @@ export default function Status(props) {
 
   useEffect(() => {
 
-    subscribeToEvent('info', (data) => {
+    subscribeToInfo((data) => {
       setPrintStatus(data.status);
       setPrintProgress((data.progress.sent/data.progress.total)*100);
       if (data.status === 'completed') {
@@ -105,15 +105,15 @@ export default function Status(props) {
       }
     });
 
-    emitEvent('getInfo');
+    emitGetInfo();
 
-    subscribeToEvent('newFileToPrint', (file) => {
+    subscribeToNewFileToPrint((file) => {
       window.sessionStorage.setItem('print_file_id', file.id);
       window.sessionStorage.setItem('print_file_name', file.name);
       setLoadedFile({id: file.id, name: file.name});
     });
 
-    subscribeToEvent('deleteLoadedFile', () => {
+    subscribeToDeleteLoadedFile(() => {
       window.sessionStorage.removeItem('print_file_id');
       window.sessionStorage.removeItem('print_file_name');
       setLoadedFile({id: null, name: null});
@@ -123,7 +123,7 @@ export default function Status(props) {
       });
     });
 
-    subscribeToEvent('printStatus', (status) => {
+    subscribeToStatus((status) => {
 
       setPrintStatus(status);
       if (status === 'completed') {
@@ -134,40 +134,40 @@ export default function Status(props) {
           name: null
         });
         setPrintProgress(0);
-        emitEvent('deleteLoadedFile');
+        emitDeleteLoadedFile();
       }
 
     });
 
-    subscribeToEvent('printProgress', (progress) => {
+    subscribeToProgress((progress) => {
       setPrintProgress((progress.sent/progress.total)*100);
     });
 
-    subscribeToEvent('temperature', (temp) => {
+    subscribeToTemperature((temp) => {
       setPrintTemperature(temp);
     });
 
     return () => {
-      unsubscribeFromEvent('info');
-      unsubscribeFromEvent('newFileToPrint');
-      unsubscribeFromEvent('deleteLoadedFile');
-      unsubscribeFromEvent('printStatus');
-      unsubscribeFromEvent('printProgress');
-      unsubscribeFromEvent('temperature');
+      unsubscribeFromInfo();
+      unsubscribeFromNewFileToPrint();
+      unsubscribeFromDeleteLoadedFile();
+      unsubscribeFromStatus();
+      unsubscribeFromProgress();
+      unsubscribeFromTemperature();
     }
 
   }, []);
 
   const handlePlayButtonClick = (e) => {
     if (printStatus === 'paused') {
-      emitEvent('unpausePrint');
+      emitUnpausePrint();
     } else {
-      emitEvent('printFile', window.sessionStorage.getItem('print_file_id'));
+      emitPrintFile(window.sessionStorage.getItem('print_file_id'));
     }
   }
 
   const handlePauseButtonClick = (e) => {
-    emitEvent('pausePrint');
+    emitPausePrint();
   }
 
   const handleStopButtonClick = (e) => {
@@ -180,7 +180,7 @@ export default function Status(props) {
 
   const handleStopConfirm = (e) => {
     setOpenConfirmStopDialog(false);
-    emitEvent('cancelPrint');
+    emitCancelPrint();
   }
 
   const handleConfirmCompletedPrint = () => {
@@ -195,7 +195,7 @@ export default function Status(props) {
       id: null,
       name: null
     });
-    emitEvent('deleteLoadedFile');
+    emitDeleteLoadedFile();
   }
 
   if (!loadedFilePromiseResolved) {

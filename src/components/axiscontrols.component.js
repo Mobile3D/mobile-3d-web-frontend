@@ -9,7 +9,7 @@ import KeyboardArrowLeftIcon from '@material-ui/icons/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@material-ui/icons/KeyboardArrowRight';
 import HomeIcon from '@material-ui/icons/Home';
 
-import { subscribeToEvent, unsubscribeFromEvent, emitEvent } from '../services/socket.service';
+import { subscribeToStatus, subscribeToInfo, unsubscribeFromInfo, unsubscribeFromStatus, emitMoveDirection } from '../services/socket.service';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -48,23 +48,23 @@ export default function AxisControls(props) {
 
   useEffect(() => {
 
-    subscribeToEvent('info', (data) => {
+    subscribeToInfo((data) => {
       setPrintStatus(data.status);
     });
 
-    subscribeToEvent('printStatus', (status) => {
+    subscribeToStatus((status) => {
       setPrintStatus(status);
     });
 
     return () => {
-      unsubscribeFromEvent('info');
-      unsubscribeFromEvent('printStatus');
+      unsubscribeFromInfo();
+      unsubscribeFromStatus();
     }
 
   }, []);
 
   const handleMoveButtonClick = (direction) => {
-    emitEvent(direction, selectedLength);
+    emitMoveDirection(direction, selectedLength);
   }
 
   return (

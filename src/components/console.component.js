@@ -6,7 +6,7 @@ import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
 
-import { subscribeToEvent, emitEvent, unsubscribeFromEvent } from '../services/socket.service';
+import { subscribeToConsoleLog, subscribeToStatus, subscribeToInfo, emitSendManualCommand, unsubscribeFromConsoleLog, unsubscribeFromInfo, unsubscribeFromStatus } from '../services/socket.service';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -54,7 +54,7 @@ export default function Console(props) {
   const logBox = useRef();
 
   useEffect(() => {
-    subscribeToEvent('printConsoleLog', (consoleLog) => {
+    subscribeToConsoleLog((consoleLog) => {
 
       const consoleLogWithId = [];
 
@@ -66,18 +66,18 @@ export default function Console(props) {
       logBox.current.scrollTop = logBox.current.scrollHeight;
     });
 
-    subscribeToEvent('info', (data) => {
+    subscribeToInfo((data) => {
       setPrintStatus(data.status);
     });
 
-    subscribeToEvent('printStatus', (status) => {
+    subscribeToStatus((status) => {
       setPrintStatus(status);
     });
 
     return () => {
-      unsubscribeFromEvent('printConsoleLog');
-      unsubscribeFromEvent('info');
-      unsubscribeFromEvent('printStatus');
+      unsubscribeFromConsoleLog();
+      unsubscribeFromInfo();
+      unsubscribeFromStatus();
     }
 
   }, []);
@@ -89,13 +89,13 @@ export default function Console(props) {
 
   const handleBtnSendClick = (e) => {
     if (txtCommand !== '') {
-      emitEvent('sendManualCommand', txtCommand);
+      emitSendManualCommand(txtCommand);
     }
   }
 
   const handleEnterKeyDown = (e) => {
     if (e.key === 'Enter' && txtCommand !== '') {
-      emitEvent('sendManualCommand', txtCommand);
+      emitSendManualCommand(txtCommand);
     }
   }
 
