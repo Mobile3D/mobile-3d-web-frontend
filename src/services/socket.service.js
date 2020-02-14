@@ -1,6 +1,6 @@
 import io from 'socket.io-client';
 
-const socket = io('http://' + window.location.host.split(':')[0] + ':4000', {
+const socket = io('http://' + window.location.host.split(':')[0], {
   query: {
     token: 'Bearer ' + window.localStorage.getItem('token')
   }

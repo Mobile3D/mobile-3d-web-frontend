@@ -9,11 +9,11 @@ export const apiHelper = {
 };
 
 function getUrl() {
-  return 'http://' + window.location.host.split(':')[0] + ':4000/api/v1';
+  return 'http://' + window.location.host.split(':')[0] + '/api/v1';
 }
 
 function getFileUrl() {
-  return 'http://' + window.location.host.split(':')[0] + ':4000/files';
+  return 'http://' + window.location.host.split(':')[0] + '/files';
 }
 
 function getDefaultHeaders() {
